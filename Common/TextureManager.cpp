@@ -12,9 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 
 #include "TextureManager.h"
-
 #include <iostream>
-
 #include "SOIL.h"
 
 int TextureManager::CreateTextureFromFile(const std::string &file, const std::string &textureName, GLenum type,
@@ -28,9 +26,9 @@ int TextureManager::CreateTextureFromFile(const std::string &file, const std::st
         std::cerr << "Failed to create texture \'" << file << " \'" << std::endl;
         return -1;
     }
-    TextureObject* t = CreateTexture(textureName, width, height, type, textureUnit);
+    TextureObject* t = CreateTexture(textureName, width, height, type, textureUnit, channel == 3 ? GL_RGB32F : GL_RGBA32F);
 
-    glTextureSubImage2D(t->GetHandle(), 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    glTextureSubImage2D(t->GetHandle(), 0, 0, 0, width, height, channel == 3 ? GL_RGB: GL_RGBA/*GL_RGBA*/, GL_UNSIGNED_BYTE, img);
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -39,16 +37,13 @@ int TextureManager::CreateTextureFromFile(const std::string &file, const std::st
 
 TextureObject *
 TextureManager::CreateTexture(const std::string &textureName, GLint width, GLint height, GLenum textureType,
-                              GLint textureUnit) {
+                              GLint textureUnit, GLenum channel) {
     TextureObject* t = new TextureObject;
     GLuint textureHandle;
     glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle);
     glBindTexture(GL_TEXTURE_2D, textureHandle);
 
-    glTextureStorage2D(textureHandle, 6, GL_RGB32F, width, height);
-
-//    glTexImage2D(textureType, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
+    glTextureStorage2D(textureHandle, 6, channel, width, height);
 
     GLuint samplerID;
     glCreateSamplers(1, &samplerID);
@@ -71,7 +66,6 @@ void TextureManager::SetSamplerClampingProperties(GLuint samplerID, GLenum clamp
     glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_R, clampProp);
     glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, mipmapProp);
     glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, mipmapProp);
-
 }
 
 TextureObject *TextureManager::FindTextureByName(const std::string &name) {
@@ -79,7 +73,20 @@ TextureObject *TextureManager::FindTextureByName(const std::string &name) {
 }
 
 void TextureManager::BindTexture(TextureObject *pTexture) {
-    glActiveTexture(GL_TEXTURE0 + pTexture->GetTextureUnit());
-    glBindTexture(pTexture->GetTextureType(), pTexture->GetHandle());
+//    glActiveTexture(GL_TEXTURE0 + pTexture->GetTextureUnit());
+//    glBindTexture(pTexture->GetTextureType(), pTexture->GetHandle());
+    BindTextureTo(pTexture, pTexture->GetTextureUnit());
 }
 
+void TextureManager::RegisterFromPointer(const std::string &name, TextureObject *pTexture) {
+    if(mTextureObjects.find(name) != mTextureObjects.end())
+    {
+        mTextureObjects.erase(mTextureObjects.find(name));
+    }
+    mTextureObjects[name] = pTexture;
+}
+
+void TextureManager::BindTextureTo(TextureObject* pTexture, GLuint location) {
+    glActiveTexture(GL_TEXTURE0 + location);
+    glBindTexture(pTexture->GetTextureType(), pTexture->GetHandle());
+}

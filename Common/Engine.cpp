@@ -106,6 +106,7 @@ void Engine::InitEngine() {
     InputManager::Init();
     mGUIManager.Init(m_pGUIWindow);
 
+    SetupFBO();
     SetupShaders();
     SetupMeshes();
     SetupTextures();
@@ -236,6 +237,10 @@ void Engine::PreRender() {
     m_pScenes[mFocusedSceneIdx]->PreRender();
 }
 
+void Engine::RenderToGBuffer() {
+
+}
+
 void Engine::Render() {
     m_pScenes[mFocusedSceneIdx]->Render();
 }
@@ -328,12 +333,25 @@ void Engine::SetupShaders() {
                                                                   {GL_VERTEX_SHADER,"../shaders/Blinn-PhongShading.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../shaders/Blinn-PhongShading.frag"} });
     pShader->bindUniformBlockToBindingPoint("LightBlock", 1);
+
+    pShader = mShaderManager.AddComponent("DeferredRender", new Shader("DeferredRender"), true);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../shaders/EngineShader/DeferredRender.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../shaders/EngineShader/DeferredRender.frag"} });
+
+    pShader = mShaderManager.AddComponent("DebugShader", new Shader("DebugShader"), true);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../shaders/EngineShader/DebugShader.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../shaders/EngineShader/DebugShader.frag"} });
+
+    pShader = mShaderManager.AddComponent("FSQShader", new Shader("FSQShader"), true);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../shaders/EngineShader/FSQ.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../shaders/EngineShader/FSQ.frag"} });
 }
 
 void Engine::SetupMeshes() {
     OBJReader objReader;
-
-
 
     auto pMesh = mMeshManager.AddComponent("Bunny", std::make_shared<Mesh>("Bunny"));
     pMesh->ClearData();
@@ -393,6 +411,11 @@ void Engine::SetupMeshes() {
     pMesh = mMeshManager.AddComponent("Bulb", std::make_shared<Mesh>("Bulb"));
     pMesh->ClearData();
     objReader.ReadOBJFile("../models/cube2.obj", pMesh.get());
+    pMesh->Init();
+
+    pMesh = mMeshManager.AddComponent("Quad", std::make_shared<Mesh>("Quad"));
+    pMesh->ClearData();
+    objReader.ReadOBJFile("../models/quad.obj", pMesh.get());
     pMesh->Init();
 
 }
@@ -468,6 +491,31 @@ void Engine::SwapToGUIWindow() {
     glfwMakeContextCurrent(m_pGUIWindow);
 
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+}
+
+void Engine::SetupFBO() {
+    const glm::vec2 gBufferResolution = GetWindowSize();
+    //Init gBuffer
+    gBuffer.Init(gBufferResolution.x, gBufferResolution.y);
+    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("gBufferPosBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT0, gBufferPosBufferTexture);
+    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("gBufferNormalBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT1, gBufferNormalBufferTexture);
+    TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("gBufferUVBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGBA32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT2, gBufferUVBufferTexture);
+    TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("gBufferDepthBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGBA32F);
+    gBuffer.SetAttachment(GL_DEPTH_ATTACHMENT, gBufferDepthBufferTexture);
+    gBuffer.SetDepthAttachment();
+    gBuffer.UseDrawBuffers();
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cerr << "[FBO Error] Frame Buffer Incomplete" << std::endl;
+    }
+    else
+    {
+        std::cout << "[FBO Init] Frame Buffer Success" << std::endl;
+    }
 }
 
 

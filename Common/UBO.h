@@ -13,7 +13,6 @@ End Header --------------------------------------------------------*/
 #ifndef ENGINE_UBO_H
 #define ENGINE_UBO_H
 
-
 #include <cstddef>
 #include <GL/glew.h>
 

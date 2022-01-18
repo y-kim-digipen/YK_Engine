@@ -1,16 +1,15 @@
-#version 410 core
+#version 450 core
 
 uniform mat4  vertexTransform;
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3    vPosition;
-layout(location = 1) in vec3    vColor;
-
+in layout(location = 0) vec3 vPosition;
+in layout(location = 2) vec2 vUV;
 // Interpolating vertex attributes over the rasterizer
 out VS_OUT
 {
     vec4 vertexPosition; // interpolated vPosition
-    vec3 vertexColor;
+    vec2 vertexUV;
 
 } vs_out;
 
@@ -18,9 +17,9 @@ out mat4  vTransform;
 
 void main()
 {
-//    vs_out.vertexPosition = vertexTransform *  vec4( vPosition, 1.0f );
+    //    vs_out.vertexPosition = vertexTransform *  vec4( vPosition, 1.0f );
     vs_out.vertexPosition = vec4( vPosition, 1.0f );
-    vs_out.vertexColor = vColor;
+    vs_out.vertexUV = vUV;
 
     vTransform = vertexTransform;
 

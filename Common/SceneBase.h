@@ -43,7 +43,7 @@ public:
     [[nodiscard]] const std::map<std::string, std::shared_ptr<Object>>& GetObjectList() const;
     [[nodiscard]] const std::map<std::string, std::shared_ptr<Light>>& GetLightList() const;
 
-    std::shared_ptr<Object> AddObject(const std::string& objectName, const std::string& usingMesh, const std::string& usingShader);
+    std::shared_ptr<Object> AddObject(const std::string& objectName, const std::string& usingMesh, const std::string& usingShader = "DeferredRender");
     std::shared_ptr<Light> AddLight(const std::string& lightName, const std::string& usingMesh, const std::string& usingShader);
     void RemoveLight(const std::string& lightName);
     void ClearLights();
@@ -53,6 +53,8 @@ public:
     std::shared_ptr<Object> GetObject(const std::string& objName);
 
     Environment& GetEnvironment();
+
+    void UseFBO(GLuint FBOHandle, GLuint viewportWidth, GLuint viewportHeight, bool clearBuffer, GLuint viewportStartX = 0, GLuint viewportStartY = 0) const;
 protected:
     short mFocusedCameraIdx;
     std::vector<std::shared_ptr<Camera>> m_pCameras;
@@ -62,6 +64,8 @@ protected:
 private:
     std::map<std::string, std::shared_ptr<Object>> m_pObjects;
     std::map<std::string, std::shared_ptr<Light>> m_pLights;
+
+    Object* FSQ_Object;
 };
 
 #endif //ENGINE_SCENEBASE_H

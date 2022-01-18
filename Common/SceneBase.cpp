@@ -12,12 +12,21 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "SceneBase.h"
 #include "TestScene.h"
+#include "Engine.h"
 
+#include <iostream>
 
 void SceneBase::Init() {
     if(m_pCameras.empty() == false){
         mFocusedCameraIdx = 0;
     }
+
+    FSQ_Object = new Object("Quad", "Quad", "FSQShader");
+//    FSQ_Object = new Object("Quad", "Quad", "DebugShader");
+    FSQ_Object->Init();
+
+    FSQ_Object->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+    FSQ_Object->ChangeTexture(1, "");
 //    auto pLight = m_pLights.emplace("DefaultLight", new Light("DefaultLight")).first->second;
 //    pLight->SetScale(glm::vec3(0.2f));
 //    pLight->SetPosition(glm::vec3(1.f, 1.f, 0.f));
@@ -45,6 +54,8 @@ void SceneBase::PreRender() {
 }
 
 void SceneBase::Render() const {
+    FBO& gBuffer = Engine::gBuffer;
+    UseFBO(gBuffer.GetFBOHandle(), gBuffer.GetFBOSize().first, gBuffer.GetFBOSize().second, true);
     for(auto& obj : m_pObjects){
         auto& pObject = obj.second;
         if(pObject->IsRenderReady()){
@@ -57,6 +68,8 @@ void SceneBase::Render() const {
             pLight->Render();
         }
     }
+    UseFBO(0, Engine::GetWindowSize().x, Engine::GetWindowSize().y, true);
+    FSQ_Object->Render();
 }
 
 void SceneBase::PostRender() {
@@ -134,5 +147,20 @@ std::shared_ptr<Object> SceneBase::GetObject(const std::string &objName) {
     return m_pObjects[objName];
 }
 
+void SceneBase::UseFBO(GLuint FBOHandle, GLuint viewportWidth, GLuint viewportHeight, bool clearBuffer, GLuint viewportStartX,GLuint viewportStartY ) const {
+
+    glBindFramebuffer(GL_FRAMEBUFFER, FBOHandle);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cerr << "Cannot switch to FBO " << FBOHandle << std::endl;
+        std::cerr << "[FBO Error] Frame Buffer Incomplete" << std::endl;
+        return;
+    }
+    glViewport(viewportStartX, viewportStartY, viewportWidth, viewportHeight);
+    if(clearBuffer)
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+}
 
 

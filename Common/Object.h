@@ -16,7 +16,7 @@ End Header --------------------------------------------------------*/
 
 #include <memory>
 #include <functional>
-//#include <GUI/ObjectDetailContent.h>
+#include <vector>
 
 #include "Shader.h"
 #include "Mesh.h"
@@ -25,12 +25,15 @@ End Header --------------------------------------------------------*/
 namespace GUI{
     class ObjectDetailContent;
 }
+//class CubeCaptureCamera;
+
 class Object{
     friend class GUI::ObjectDetailContent;
 public:
     Object(const std::string& name);
     Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader);
     Object(const std::string& name, const std::string& meshStr, const std::string& shaderStr);
+    virtual ~Object();
     void Init();
     virtual void PreRender();
     void Render() const;
@@ -67,16 +70,24 @@ public:
     void SetTextureOption(bool usingTexture, bool usingGPUUV = false);
 
     glm::mat4 GetObjectToWorldMatrix() const;
-
     std::string GetName() const;
+    void SetFitToBox(bool option);
+    void ChangeTexture(int slot, const std::string& textureName);
 
+    void SetDoEnvironmentMapping(bool option);
+
+    bool DoEnvironmentMapping();
+
+//    CubeCaptureCamera* GetEnvironmentMappingCameras();
 private:
-    void TryCalculateMatrix();
-    void RenderModel() const;
     void RenderVertexNormal() const;
     void RenderFaceNormal() const;
 
     void SendMeshDataToShader();
+
+protected:
+    virtual void TryCalculateMatrix();
+    virtual void RenderModel() const;
 
 protected:
     std::shared_ptr<Mesh> m_pMesh;
@@ -84,7 +95,6 @@ protected:
     std::string mObjectName;
     std::string mMeshName;
     std::string mShaderName;
-//    std::shared_ptr<Texture> mTexture;
 
     GLboolean m_MatrixCacheDirty;
 
@@ -103,7 +113,13 @@ protected:
     bool mDoRender;
     bool mUsingTexture;
     bool mUsingGPUUV;
+    bool mFitToBox;
     Mesh::UVType mUVType;
+
+    std::vector<std::string> mTextureSlots;
+
+    bool mDoEnvironmentMapping;
+//    CubeCaptureCamera* mEnvironmentMappingCam;
 };
 
 #endif //ENGINE_OBJECT_H

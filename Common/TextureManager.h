@@ -21,15 +21,19 @@ End Header --------------------------------------------------------*/
 class TextureManager {
 public:
     int CreateTextureFromFile(const std::string& file, const std::string& textureName, GLenum type, GLint textureUnit);
+    void RegisterFromPointer(const std::string& name, TextureObject* pTexture);
     TextureObject* FindTextureByName(const std::string& name);
     void BindTexture(TextureObject* pTexture);
+    void BindTextureTo(TextureObject* pTexture, GLuint location);
+    TextureObject* CreateTexture(const std::string& textureName, GLint width, GLint height, GLenum textureType, GLint textureUnit, GLenum channel);
 private:
-    TextureObject* CreateTexture(const std::string& textureName, GLint width, GLint height, GLenum textureType, GLint textureUnit);
+
     void SetSamplerClampingProperties(GLuint samplerID, GLenum clampProp, GLenum mipmapProp);
 
     //todo change this to shared ptr
     std::map<std::string, TextureObject*> mTextureObjects;
     std::map<TextureObject*, GLuint> mSamplerObjects;
+
 };
 
 

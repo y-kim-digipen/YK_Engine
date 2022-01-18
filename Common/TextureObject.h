@@ -24,7 +24,10 @@ public:
     GLint GetTextureUnit();
     GLenum GetTextureType();
     GLuint GetHandle();
+    std::pair<GLuint, GLuint> GetSize();
     void SetTextureUniform(std::shared_ptr<Shader> pShader);
+
+    std::string GetName() const;
 private:
     GLuint mTextureHandle;
     GLuint mWidth, mHeight;

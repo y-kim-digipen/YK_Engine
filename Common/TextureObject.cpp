@@ -12,6 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 
 #include "TextureObject.h"
+#include "Engine.h"
 
 void TextureObject::SetTextureValues(GLuint textureHandle, GLuint width, GLuint height, GLenum textureType,
                                      GLint textureUnit) {
@@ -34,6 +35,10 @@ void TextureObject::SetTextureUniform(std::shared_ptr<Shader> pShader) {
     if(texSamplerLoc >= 0)//Has uniform
     {
         glUniform1i(texSamplerLoc, mTextureUnit);
+    } else{
+        Engine::GetTextureManager().BindTextureTo(this, 0);
+        texSamplerLoc = glGetUniformLocation(pShader->GetProgramID(), "tex_object0");
+        glUniform1i(texSamplerLoc, mTextureUnit);
     }
 }
 
@@ -43,4 +48,12 @@ GLenum TextureObject::GetTextureType() {
 
 GLuint TextureObject::GetHandle() {
     return mTextureHandle;
+}
+
+std::pair<GLuint, GLuint> TextureObject::GetSize() {
+    return std::pair<GLuint, GLuint>(mWidth, mHeight);
+}
+
+std::string TextureObject::GetName() const {
+    return mShaderName;
 }
