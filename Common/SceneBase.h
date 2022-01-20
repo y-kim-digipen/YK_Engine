@@ -65,7 +65,8 @@ private:
     std::map<std::string, std::shared_ptr<Object>> m_pObjects;
     std::map<std::string, std::shared_ptr<Light>> m_pLights;
 
-    Object* FSQ_Object;
+    Object* Debug_FSQ;
+    Object* Result_FSQ;
 };
 
 #endif //ENGINE_SCENEBASE_H

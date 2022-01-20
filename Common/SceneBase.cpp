@@ -21,22 +21,20 @@ void SceneBase::Init() {
         mFocusedCameraIdx = 0;
     }
 
-    FSQ_Object = new Object("Quad", "Quad", "FSQShader");
-//    FSQ_Object = new Object("Quad", "Quad", "DebugShader");
-    FSQ_Object->Init();
+    Debug_FSQ = new Object("Quad", "Quad", "FSQShader");
+    Debug_FSQ->Init();
 
-    FSQ_Object->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
-    FSQ_Object->ChangeTexture(1, "");
-//    auto pLight = m_pLights.emplace("DefaultLight", new Light("DefaultLight")).first->second;
-//    pLight->SetScale(glm::vec3(0.2f));
-//    pLight->SetPosition(glm::vec3(1.f, 1.f, 0.f));
-//
-//    pLight = m_pLights.emplace("DefaultLight2", new Light("DefaultLight2")).first->second;
-//    pLight->SetScale(glm::vec3(0.2f));
-//    pLight->SetPosition(glm::vec3(-3.f, 0.f, 0.f));
-////    pLight->std140_structure.I_Emissive = glm::vec3(0.f, 0.f, 230.f);
-//    pLight->std140_structure.position = glm::vec3(0.f, 0.f, 3.f);
-////    pLight->std140_structure.I_Emissive = glm::vec3(0.f, 59.f, 9.f);
+    Debug_FSQ->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+    Debug_FSQ->ChangeTexture(1, "");
+
+
+    Result_FSQ = new Object("Quad", "Quad", "ResultShader");
+    Result_FSQ->Init();
+    Result_FSQ->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
+    Result_FSQ->ChangeTexture(1, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+    Result_FSQ->ChangeTexture(2, "");
+    Result_FSQ->ChangeTexture(3, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT3));
+
 }
 
 void SceneBase::PreRender() {
@@ -69,7 +67,8 @@ void SceneBase::Render() const {
         }
     }
     UseFBO(0, Engine::GetWindowSize().x, Engine::GetWindowSize().y, true);
-    FSQ_Object->Render();
+//    Debug_FSQ->Render();
+    Result_FSQ->Render();
 }
 
 void SceneBase::PostRender() {
@@ -83,7 +82,6 @@ void SceneBase::PostRender() {
             pLight->PostRender();
         }
     }
-
 }
 
 void SceneBase::CleanUp() {

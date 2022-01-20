@@ -39,10 +39,10 @@ Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared
     mUsingGPUUV = true;
     mFitToBox = true;
 
-    mTextureSlots.resize(2);
+    mTextureSlots.resize(10);
 
     mTextureSlots[0] = "tex_object0";
-    mTextureSlots[1] = "tex_object1";
+//    mTextureSlots[1] = "tex_object1";
 
     mDoEnvironmentMapping = false;
 //    mEnvironmentMappingCam = nullptr;
@@ -491,6 +491,10 @@ void Object::SetTextureOption(bool usingTexture, bool usingGPUUV) {
 }
 
 void Object::ChangeTexture(int slot, const std::string &textureName) {
+    if(slot >= mTextureSlots.size())
+    {
+        throw std::out_of_range("Trying to change texture out of bound");
+    }
     mTextureSlots[slot] = textureName;
 }
 

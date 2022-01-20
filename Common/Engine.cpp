@@ -348,6 +348,11 @@ void Engine::SetupShaders() {
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
                                                                   {GL_VERTEX_SHADER,"../shaders/EngineShader/FSQ.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../shaders/EngineShader/FSQ.frag"} });
+
+    pShader = mShaderManager.AddComponent("ResultShader", new Shader("ResultShader"), true);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../shaders/DeferredPhong.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../shaders/DeferredPhong.frag"} });
 }
 
 void Engine::SetupMeshes() {
@@ -497,14 +502,14 @@ void Engine::SetupFBO() {
     const glm::vec2 gBufferResolution = GetWindowSize();
     //Init gBuffer
     gBuffer.Init(gBufferResolution.x, gBufferResolution.y);
-    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("gBufferPosBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
+    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("viewPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT0, gBufferPosBufferTexture);
-    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("gBufferNormalBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
+    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("normalBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGBA32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT1, gBufferNormalBufferTexture);
-    TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("gBufferUVBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGBA32F);
+    TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("uvBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGBA32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT2, gBufferUVBufferTexture);
-    TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("gBufferDepthBufferTexture", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGBA32F);
-    gBuffer.SetAttachment(GL_DEPTH_ATTACHMENT, gBufferDepthBufferTexture);
+    TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("depthBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGBA32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT3, gBufferDepthBufferTexture);
     gBuffer.SetDepthAttachment();
     gBuffer.UseDrawBuffers();
 

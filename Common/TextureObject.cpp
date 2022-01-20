@@ -36,6 +36,7 @@ void TextureObject::SetTextureUniform(std::shared_ptr<Shader> pShader) {
     {
         glUniform1i(texSamplerLoc, mTextureUnit);
     } else{
+        std::cout << GetName() << std::endl;
         Engine::GetTextureManager().BindTextureTo(this, 0);
         texSamplerLoc = glGetUniformLocation(pShader->GetProgramID(), "tex_object0");
         glUniform1i(texSamplerLoc, mTextureUnit);
