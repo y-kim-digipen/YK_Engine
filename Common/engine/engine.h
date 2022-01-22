@@ -2,8 +2,8 @@
 Copyright (C) 2021 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
-File Name: Engine.h
-Purpose: Header file for Engine
+File Name: engine.h
+Purpose: Header file for engine
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
 Project: y.kim_CS300_2
@@ -47,14 +47,14 @@ namespace GUI
     class EngineInfoContent;
 }
 
-class Engine
+class engine
 {
     friend GUI::EngineInfoContent;
 public:
-    Engine();
+    engine();
 
     //todo check it is useful, if not delete this function
-    //static Engine* GetInstance();
+    //static engine* GetInstance();
     static int InitWindow(glm::vec2 win_size, const std::string& title_name);
 
     //Initializing engine features except windows

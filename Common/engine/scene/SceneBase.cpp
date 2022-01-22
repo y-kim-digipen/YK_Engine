@@ -12,7 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "SceneBase.h"
 #include "TestScene.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 
 #include <iostream>
 
@@ -24,59 +24,68 @@ void SceneBase::Init() {
     Debug_FSQ = new Object("Quad", "Quad", "FSQShader");
     Debug_FSQ->Init();
 
-    Debug_FSQ->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+    Debug_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
     Debug_FSQ->ChangeTexture(1, "");
 
 
     Result_FSQ = new Object("Quad", "Quad", "ResultShader");
     Result_FSQ->Init();
-    Result_FSQ->ChangeTexture(0, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
-    Result_FSQ->ChangeTexture(1, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
-//    Result_FSQ->ChangeTexture(2, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT2));
+    Result_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
+    Result_FSQ->ChangeTexture(1, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+//    Result_FSQ->ChangeTexture(2, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT2));
     Result_FSQ->ChangeTexture(2, "");
-    Result_FSQ->ChangeTexture(3, Engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT3));
+    Result_FSQ->ChangeTexture(3, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT3));
 }
 
 void SceneBase::PreRender() {
     for(auto& cam : m_pCameras){
         cam->Update();
     }
-    for(auto& obj : m_pObjects){
+    for(auto& obj : m_pDeferredObjects){
         auto& pObject = obj.second;
         pObject->PreRender();
     }
-    for(auto& light : m_pLights){
+    for(auto& light : m_pForwardedObjects){
         auto& pLight = light.second;
         pLight->PreRender();
     }
 }
 
 void SceneBase::Render() const {
-    FBO& gBuffer = Engine::gBuffer;
+    FBO& gBuffer = engine::gBuffer;
     UseFBO(gBuffer.GetFBOHandle(), gBuffer.GetFBOSize().first, gBuffer.GetFBOSize().second, true);
-    for(auto& obj : m_pObjects){
+    for(auto& obj : m_pDeferredObjects){
         auto& pObject = obj.second;
         if(pObject->IsRenderReady()){
             pObject->Render();
         }
     }
-    for(auto& light : m_pLights){
+
+    UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
+    Result_FSQ->Render();
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.GetFBOHandle());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    glBlitFramebuffer(0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
+                      0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
+                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+//    Debug_FSQ->Render();
+    for(auto& light : m_pForwardedObjects){
         auto& pLight = light.second;
         if(pLight->IsRenderReady()) {
             pLight->Render();
         }
     }
-    UseFBO(0, Engine::GetWindowSize().x, Engine::GetWindowSize().y, true);
-//    Debug_FSQ->Render();
-    Result_FSQ->Render();
 }
 
 void SceneBase::PostRender() {
-    for(auto& obj : m_pObjects){
+    for(auto& obj : m_pDeferredObjects){
         auto& pObject = obj.second;
         pObject->PostRender();
     }
-    for(auto& light : m_pLights){
+    for(auto& light : m_pForwardedObjects){
         auto& pLight = light.second;
         if(pLight->IsRenderReady()) {
             pLight->PostRender();
@@ -85,7 +94,8 @@ void SceneBase::PostRender() {
 }
 
 void SceneBase::CleanUp() {
-    m_pObjects.clear();
+    m_pDeferredObjects.clear();
+    m_pForwardedObjects.clear();
     m_pCameras.clear();
 }
 
@@ -110,19 +120,19 @@ void SceneBase::AddCamera(std::shared_ptr<Camera> cam) {
 }
 
 const std::map<std::string, std::shared_ptr<Object>> &SceneBase::GetObjectList() const {
-    return m_pObjects;
+    return m_pDeferredObjects;
 }
 
 std::shared_ptr<Object> SceneBase::AddObject(const std::string &objectName, const std::string &usingMesh, const std::string &usingShader) {
-    return  m_pObjects.emplace(objectName, std::make_unique<Object>(objectName, usingMesh, usingShader)).first->second;
+    return  m_pDeferredObjects.emplace(objectName, std::make_unique<Object>(objectName, usingMesh, usingShader)).first->second;
 }
 
 const std::map<std::string, std::shared_ptr<Light>> &SceneBase::GetLightList() const {
-    return m_pLights;
+    return m_pForwardedObjects;
 }
 
 std::shared_ptr<Light> SceneBase::AddLight(const std::string &objectName, const std::string &usingMesh, const std::string &usingShader) {
-    return  m_pLights.emplace(objectName, std::make_unique<Light>(objectName, usingMesh, usingShader)).first->second;
+    return  m_pForwardedObjects.emplace(objectName, std::make_unique<Light>(objectName, usingMesh, usingShader)).first->second;
 }
 
 Environment &SceneBase::GetEnvironment() {
@@ -130,19 +140,19 @@ Environment &SceneBase::GetEnvironment() {
 }
 
 unsigned SceneBase::GetNumActiveLights() const {
-    return m_pLights.size();
+    return m_pForwardedObjects.size();
 }
 
 void SceneBase::RemoveLight(const std::string &lightName) {
-    m_pLights.erase(m_pLights.find(lightName));
+    m_pForwardedObjects.erase(m_pForwardedObjects.find(lightName));
 }
 
 void SceneBase::ClearLights() {
-    m_pLights.clear();
+    m_pForwardedObjects.clear();
 }
 
 std::shared_ptr<Object> SceneBase::GetObject(const std::string &objName) {
-    return m_pObjects[objName];
+    return m_pDeferredObjects[objName];
 }
 
 void SceneBase::UseFBO(GLuint FBOHandle, GLuint viewportWidth, GLuint viewportHeight, bool clearBuffer, GLuint viewportStartX,GLuint viewportStartY ) const {
@@ -157,7 +167,8 @@ void SceneBase::UseFBO(GLuint FBOHandle, GLuint viewportWidth, GLuint viewportHe
     glViewport(viewportStartX, viewportStartY, viewportWidth, viewportHeight);
     if(clearBuffer)
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+//        glClear(GL_COLOR_BUFFER_BIT);
     }
 }
 

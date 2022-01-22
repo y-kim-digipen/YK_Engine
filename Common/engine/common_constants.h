@@ -11,8 +11,8 @@ Author: Yoonki Kim, y.kim,  180002421
 Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 
-#ifndef ENGINE_COMMONCONSTANTS_H
-#define ENGINE_COMMONCONSTANTS_H
+#ifndef ENGINE_COMMON_CONSTANTS_H
+#define ENGINE_COMMON_CONSTANTS_H
 #include <string>
 #include <vector>
 
@@ -40,4 +40,4 @@ struct AttributeInfo{
 
 using AttributeInfoContainer = std::vector<AttributeInfo>;
 
-#endif //ENGINE_COMMONCONSTANTS_H
+#endif //ENGINE_COMMON_CONSTANTS_H

@@ -16,7 +16,7 @@ End Header --------------------------------------------------------*/
 
 #include <GL/glew.h>
 
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "Shader.h"
 
 void Shader::deleteProgram()
@@ -170,8 +170,8 @@ bool Shader::CreateProgramAndLoadCompileAttachLinkShaders(const std::vector<std:
         attributeInfos.push_back(AttributeInfo{attribLocation, name, dataType, static_cast<GLint>(datasize)});
     }
     mAttributeInfos = attributeInfos;
-    mAttributeInfoID = Engine::GetVAOManager().GetAttribID(mAttributeInfos);
-    GLuint VAOID = Engine::GetVAOManager().GetAttribID(mAttributeInfos);
+    mAttributeInfoID = engine::GetVAOManager().GetAttribID(mAttributeInfos);
+    GLuint VAOID = engine::GetVAOManager().GetAttribID(mAttributeInfos);
     printf("\tVAOID: %d\n", VAOID);
 
     GLint numActiveUniforms = 0;
@@ -458,7 +458,7 @@ void Shader::SetAllUniforms(const std::string& objName)
 
 void Shader::Reload()
 {
-    Engine::SkipFrame(1);
+    engine::SkipFrame(1);
     deleteProgram();
     CreateProgramAndLoadCompileAttachLinkShaders(mShaderPaths);
 }

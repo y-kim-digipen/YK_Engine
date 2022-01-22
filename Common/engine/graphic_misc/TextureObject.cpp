@@ -12,7 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 
 #include "TextureObject.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 
 void TextureObject::SetTextureValues(GLuint textureHandle, GLuint width, GLuint height, GLenum textureType,
                                      GLint textureUnit) {
@@ -39,7 +39,7 @@ void TextureObject::SendToShader(std::shared_ptr<Shader> pShader, int slot) {
     }
     else{
 //        std::cout << GetName() << std::endl;
-//        Engine::GetTextureManager().BindTextureTo(this, 0);
+//        engine::GetTextureManager().BindTextureTo(this, 0);
         texSamplerLoc = glGetUniformLocation(pShader->GetProgramID(), "tex_object0");
         glUniform1i(texSamplerLoc, mTextureUnit);
     }

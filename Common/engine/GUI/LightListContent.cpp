@@ -11,7 +11,7 @@ Author: Yoonki Kim, y.kim,  180002421
 Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "LightListContent.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "GUIWindow.h"
 #include "ColorSet.h"
 #include "LightDetailContent.h"
@@ -22,7 +22,7 @@ namespace GUI{
     void LightListContent::Render() {
         constexpr size_t inputBufferSize = 20;
 
-        auto pCurrentScene = Engine::GetCurrentScene();
+        auto pCurrentScene = engine::GetCurrentScene();
         if(pCurrentScene == nullptr){
             return;
         }
@@ -45,7 +45,7 @@ namespace GUI{
             //todo fix bug
             ImGui::SameLine();
             ImGui::SetNextItemWidth(120);
-            auto& GUIManager = Engine::GetGUIManager();
+            auto& GUIManager = engine::GetGUIManager();
             if(!GUIManager.HasWindow(objNameStr)){
                 if(ImGui::Button("  Detail  ")){
                     auto pWindow = GUIManager.AddWindow(objNameStr);

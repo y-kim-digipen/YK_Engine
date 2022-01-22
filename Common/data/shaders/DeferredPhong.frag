@@ -78,11 +78,11 @@ void main()
     vec3 Sum_Local_Light = vec3(0.f);
     vec3 V = position;
 
-    if(V == vec3(0.f))
-    {
-        fragColor = V;
-        return;
-    }
+//    if(V == vec3(0.f))
+//    {
+//        fragColor = V;
+//        return;
+//    }
 
     float CameraDistance = depthFromEye;
     vec3 V_Normalized = normalize(V);

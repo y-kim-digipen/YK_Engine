@@ -62,8 +62,8 @@ protected:
     Environment mEnvironment;
 
 private:
-    std::map<std::string, std::shared_ptr<Object>> m_pObjects;
-    std::map<std::string, std::shared_ptr<Light>> m_pLights;
+    std::map<std::string, std::shared_ptr<Object>> m_pDeferredObjects;
+    std::map<std::string, std::shared_ptr<Light>> m_pForwardedObjects;
 
     Object* Debug_FSQ;
     Object* Result_FSQ;

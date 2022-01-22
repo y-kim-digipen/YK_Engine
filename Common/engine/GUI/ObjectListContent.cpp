@@ -13,7 +13,7 @@ End Header --------------------------------------------------------*/
 
 #include "ObjectListContent.h"
 
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "GUIWindow.h"
 #include "ColorSet.h"
 #include "ObjectDetailContent.h"
@@ -24,7 +24,7 @@ namespace GUI{
     void ObjectListContent::Render() {
         constexpr size_t inputBufferSize = 20;
 
-        auto pCurrentScene = Engine::GetCurrentScene();
+        auto pCurrentScene = engine::GetCurrentScene();
         if(pCurrentScene == nullptr){
             return;
         }
@@ -47,7 +47,7 @@ namespace GUI{
             //todo fix bug
             ImGui::SameLine();
             ImGui::SetNextItemWidth(120);
-            auto& GUIManager = Engine::GetGUIManager();
+            auto& GUIManager = engine::GetGUIManager();
             if(!GUIManager.HasWindow(objNameStr)){
                 if(ImGui::Button("  Detail  ")){
                     auto pWindow = GUIManager.AddWindow(objNameStr);

@@ -12,7 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 
 #include "EngineInfo.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 namespace GUI{
 
     void EngineInfo::PreRender() {
@@ -39,9 +39,9 @@ namespace GUI{
         }
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
 
-        if (ImGui::Begin("Engine Info", p_open, window_flags))
+        if (ImGui::Begin("engine Info", p_open, window_flags))
         {
-            ImGui::Text("%s\n%s%.2f", (Engine::GetTitleName()).c_str() , "FPS: " , Engine::GetFPS());
+            ImGui::Text("%s\n%s%.2f", (engine::GetTitleName()).c_str() , "FPS: " , engine::GetFPS());
             ImGui::Separator();
             ImGui::Text("(right-click to change position)");
             if (ImGui::BeginPopupContextWindow())

@@ -11,7 +11,7 @@ Author: Yoonki Kim, y.kim,  180002421
 Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "ObjectDetailContent.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "object_components/ComponentManager.h"
 #include "object_components/ComponentBase.h"
 
@@ -26,7 +26,7 @@ void GUI::ObjectDetailContent::Render() {
     if(ImGui::BeginTabBar("##TabBar")) {
         if (ImGui::BeginTabItem("Assets")) {
             //selectable shader
-            const auto &shaderList = Engine::GetShaderManager().GetNameList();
+            const auto &shaderList = engine::GetShaderManager().GetNameList();
             const std::string &currentShaderName = m_pTargetObject->GetUsingShaderName();
             if (ImGui::BeginCombo("ShaderList", currentShaderName.c_str())) {
                 for (const auto &shaderName: shaderList) {
@@ -42,7 +42,7 @@ void GUI::ObjectDetailContent::Render() {
             }
 
             //selectable mesh
-            const auto &meshList = Engine::GetMeshManager().GetNameList();
+            const auto &meshList = engine::GetMeshManager().GetNameList();
             const std::string &currentMeshName = m_pTargetObject->GetUsingMeshName();
             if (ImGui::BeginCombo("MeshList", currentMeshName.c_str())) {
                 for (const auto &meshName: meshList) {

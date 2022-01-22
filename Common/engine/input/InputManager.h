@@ -8,7 +8,6 @@
 #include "KeyCodes.h"
 
 class InputManager{
-friend class Engine;
 public:
     static void Init();
     static void Update();
@@ -18,8 +17,8 @@ public:
     static bool IsReleased(GLint KeyCode);
     static bool OnKeyDown(GLint KeyCode);
 
-private:
-    //Implementation for GLFW callback from Engine
+public:
+    //Implementation for GLFW callback from engine
     static void on_key_pressed(GLint KeyCode);
     static void on_key_released(GLint KeyCode);
 //    static void on_mouse_pressed(int button);

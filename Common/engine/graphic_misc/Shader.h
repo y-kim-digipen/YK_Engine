@@ -19,7 +19,7 @@ End Header --------------------------------------------------------*/
 
 #include <glm/glm.hpp>
 
-#include "engine/CommonConstants.h"
+#include "engine/common_constants.h"
 #include "VAOManager.h"
 
 

@@ -14,15 +14,15 @@ End Header --------------------------------------------------------*/
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine/Engine.h"
-#include "input/InputManager.h"
-#include "engine/CommonConstants.h"
+#include "engine/engine.h"
+#include "engine/input/InputManager.h"
+#include "engine/common_constants.h"
 
 Camera::Camera(void) : eye(0, 0, 4), back(0, 0, 1), right(1, 0, 0), up(0, 1, 0)
 {
     fov = PI * 0.3f;
 
-    const glm::vec2 windowSize = Engine::GetWindowSize();
+    const glm::vec2 windowSize = engine::GetWindowSize();
 
     float aspect = windowSize.x / windowSize.y;
     near = 0.1f;

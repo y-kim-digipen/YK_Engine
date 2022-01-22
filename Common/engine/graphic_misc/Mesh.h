@@ -81,7 +81,8 @@ public:
     enum UVType { PLANAR_UV = 0,
                   CYLINDRICAL_UV,
                   SPHERICAL_UV,
-                  CUBE_MAPPED_UV};
+                  CUBE_MAPPED_UV,
+                  OBJECT_DEFINED_UV};
 
     int         calcUVs( Mesh::UVType uvType = Mesh::PLANAR_UV );
     glm::vec2   calcCubeMap( glm::vec3 vEntity );

@@ -2,15 +2,15 @@
 Copyright (C) 2021 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
-File Name: Engine.cpp
-Purpose: Source file for Engine
+File Name: engine.cpp
+Purpose: Source file for engine
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
 Project: y.kim_CS300_2
 Author: Yoonki Kim, y.kim,  180002421
 Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
-#include "Engine.h"
+#include "engine.h"
 #include <iostream>
 #include <chrono>
 
@@ -35,12 +35,12 @@ End Header --------------------------------------------------------*/
 static auto CurrentTime = std::chrono::system_clock::now();
 static auto LastTime = CurrentTime;
 
-Engine::Engine() {
+engine::engine() {
     mClearColor = Color(0.f);
     mWinSize = glm::vec2{};
 }
 
-int Engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
+int engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
     mTitleStr = title_name;
     mWinSize = win_size * DPI;
 
@@ -73,8 +73,8 @@ int Engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
         return -1;
     }
     //Set up callback functions
-    glfwSetErrorCallback(&Engine::GLFWErrorCallback);
-    glfwSetKeyCallback(m_pWindow, &Engine::KeyboardInputCallback);
+    glfwSetErrorCallback(&engine::GLFWErrorCallback);
+    glfwSetKeyCallback(m_pWindow, &engine::KeyboardInputCallback);
 
     // OpenGL resource model - "glfwCreateWindow" creates the necessary data storage for the OpenGL
     // context but does NOT make the created context "current". We MUST make it current with the following
@@ -94,12 +94,12 @@ int Engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
     return 0;
 }
 
-void Engine::SetClearColor(Color newClearColor) {
+void engine::SetClearColor(Color newClearColor) {
     mClearColor = newClearColor;
     glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
 }
 
-void Engine::InitEngine() {
+void engine::InitEngine() {
     OBJReader objReader;
     mFocusedSceneIdx = -1;
     InputManager::Init();
@@ -128,10 +128,10 @@ void Engine::InitEngine() {
     environmentUBO.createUBO(sizeof(Environment::std140_structure));
     environmentUBO.bindBufferBaseToBindingPoint(2);
 
-    std::cout << "Engine is initialized, ready to update" << std::endl;
+    std::cout << "engine is initialized, ready to update" << std::endl;
 }
 
-void Engine::Update() {
+void engine::Update() {
 //    const static float TargetDeltaTime = 1.f / FPS;
     auto deltaTime = std::chrono::duration_cast<std::chrono::duration<float>>((CurrentTime - LastTime)).count();
     //todo set FPS limit
@@ -181,7 +181,7 @@ void Engine::Update() {
     glfwPollEvents();
 }
 
-void Engine::CleanUp() {
+void engine::CleanUp() {
     //delete GetInstance();
     mGUIManager.CleanUp();
     mShaderManager.Cleanup();
@@ -194,21 +194,21 @@ void Engine::CleanUp() {
     glfwTerminate();
 }
 
-std::shared_ptr<Mesh> Engine::GetMesh(const std::string &meshStr) {
+std::shared_ptr<Mesh> engine::GetMesh(const std::string &meshStr) {
     return mMeshManager.GetComponent(meshStr);
 }
 
-std::shared_ptr<Shader> Engine::GetShader(const std::string &shaderStr) {
+std::shared_ptr<Shader> engine::GetShader(const std::string &shaderStr) {
     return mShaderManager.GetComponent(shaderStr);;
 }
 
-bool Engine::IsRunning() {
+bool engine::IsRunning() {
     //todo change glfwGetKey to my input system
     return glfwGetKey(m_pWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
     glfwWindowShouldClose(m_pWindow) == 0;
 }
 
-void Engine::PreRender() {
+void engine::PreRender() {
     lightUBO.bindUBO();
 
     GLsizeiptr offset = 0;
@@ -234,23 +234,23 @@ void Engine::PreRender() {
     m_pScenes[mFocusedSceneIdx]->PreRender();
 }
 
-void Engine::RenderToGBuffer() {
+void engine::RenderToGBuffer() {
 
 }
 
-void Engine::Render() {
+void engine::Render() {
     m_pScenes[mFocusedSceneIdx]->Render();
 }
 
-void Engine::PostRender() {
+void engine::PostRender() {
     m_pScenes[mFocusedSceneIdx]->PostRender();
 }
 
-void Engine::GLFWErrorCallback([[maybe_unused]]int, const char *err_str) {
+void engine::GLFWErrorCallback([[maybe_unused]]int, const char *err_str) {
     std::cerr << "GLFW Error: " << err_str << std::endl;
 }
 
-void Engine::KeyboardInputCallback(GLFWwindow *, [[maybe_unused]] int key, [[maybe_unused]]int keyCode, int action, [[maybe_unused]] int modifier) {
+void engine::KeyboardInputCallback(GLFWwindow *, [[maybe_unused]] int key, [[maybe_unused]]int keyCode, int action, [[maybe_unused]] int modifier) {
     if (key < 0 || key > 1000)
     {
         return;
@@ -270,15 +270,15 @@ void Engine::KeyboardInputCallback(GLFWwindow *, [[maybe_unused]] int key, [[may
     }
 }
 
-glm::vec2 Engine::GetWindowSize() {
+glm::vec2 engine::GetWindowSize() {
     return mWinSize;
 }
 
-GUI::GUI_Manager &Engine::GetGUIManager() {
+GUI::GUI_Manager &engine::GetGUIManager() {
     return mGUIManager;
 }
 
-void Engine::SetupScenes() {
+void engine::SetupScenes() {
     SceneBase* baseScene = new TestScene();
     baseScene->AddCamera();
     baseScene->GetCurrentCamera()->SetPosition(glm::vec3(0.f, 1.f, 5.f));
@@ -286,7 +286,7 @@ void Engine::SetupScenes() {
     m_pScenes.emplace_back(baseScene);
 }
 
-void Engine::SetupShaders() {
+void engine::SetupShaders() {
     auto pShader = mShaderManager.AddComponent("TestShader", new Shader("TestShader"));
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
                                                                   {GL_VERTEX_SHADER,"../data/shaders/QuadVertexShader.vert"},
@@ -312,10 +312,6 @@ void Engine::SetupShaders() {
                                                                   {GL_VERTEX_SHADER,"../data/shaders/FaceNormalVertexShader.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/FaceNormalFragmentShader.frag"} });
 
-    pShader = mShaderManager.AddComponent("Blinn-Phong Shader", new Shader("Blinn-Phong Shader"), true);
-    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
-                                                                  {GL_VERTEX_SHADER,"../data/shaders/Blinn-PhongShading.vert"},
-                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/Blinn-PhongShading.frag"} });
 
     pShader->bindUniformBlockToBindingPoint("LightBlock", 1);
 
@@ -340,10 +336,12 @@ void Engine::SetupShaders() {
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/DeferredPhong.frag"} });
 }
 
-void Engine::SetupMeshes() {
+void engine::SetupMeshes() {
     OBJReader objReader;
 
-    auto pMesh = mMeshManager.AddComponent("Bunny", std::make_shared<Mesh>("Bunny"));
+    auto
+
+     pMesh = mMeshManager.AddComponent("Bunny", std::make_shared<Mesh>("Bunny"));
     pMesh->ClearData();
     objReader.ReadOBJFile("../data/models/bunny.obj", pMesh.get());
     pMesh->Init();
@@ -378,10 +376,10 @@ void Engine::SetupMeshes() {
     objReader.ReadOBJFile("../data/models/cup.obj", pMesh.get());
     pMesh->Init();
 
-    pMesh = mMeshManager.AddComponent("StarWars", std::make_shared<Mesh>("StarWars"));
-    pMesh->ClearData();
-    objReader.ReadOBJFile("../data/models/starwars1.obj", pMesh.get());
-    pMesh->Init();
+//    pMesh = mMeshManager.AddComponent("StarWars", std::make_shared<Mesh>("StarWars"));
+//    pMesh->ClearData();
+//    objReader.ReadOBJFile("../data/models/starwars1.obj", pMesh.get());
+//    pMesh->Init();
 
     pMesh = mMeshManager.AddComponent("4Sphere", std::make_shared<Mesh>("4Sphere"));
     pMesh->ClearData();
@@ -408,6 +406,7 @@ void Engine::SetupMeshes() {
     objReader.ReadOBJFile("../data/models/quad.obj", pMesh.get());
     pMesh->Init();
 
+
 //    pMesh = mMeshManager.AddComponent("Barrel", std::make_shared<Mesh>("Barrel"));
 //    pMesh->ClearData();
 //    objReader.ReadOBJFile("../models/Barrel.obj", pMesh.get());
@@ -415,11 +414,11 @@ void Engine::SetupMeshes() {
 
 }
 
-SceneBase* Engine::GetCurrentScene() {
+SceneBase* engine::GetCurrentScene() {
     return m_pScenes[mFocusedSceneIdx];
 }
 
-void Engine::SetupGUI() {
+void engine::SetupGUI() {
     using namespace GUI;
 //    auto pGUIWindow = mGUIManager.AddWindow("Camera Settings");
 //    pGUIWindow->AddContent("Position", new CurrentCameraInfoContent());
@@ -433,47 +432,47 @@ void Engine::SetupGUI() {
 
     pGUIWindow = mGUIManager.AddWindow("Global Setting");
     pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
-    pGUIWindow->AddContent("Engine Info", new EngineInfoContent());
+    pGUIWindow->AddContent("engine Info", new EngineInfoContent());
 }
 
-std::string Engine::GetTitleName() {
+std::string engine::GetTitleName() {
     return mTitleStr;
 }
 
-float Engine::GetFPS() {
+float engine::GetFPS() {
     return FPS;
 }
 
-ComponentManager<Mesh> &Engine::GetMeshManager() {
+ComponentManager<Mesh> &engine::GetMeshManager() {
     return mMeshManager;
 }
 
-ComponentManager<Shader> &Engine::GetShaderManager() {
+ComponentManager<Shader> &engine::GetShaderManager() {
     return mShaderManager;
 }
 
-VAOManager &Engine::GetVAOManager() {
+VAOManager &engine::GetVAOManager() {
     return mVAOManager;
 }
 
-VBOManager &Engine::GetVBOManager() {
+VBOManager &engine::GetVBOManager() {
     return mVBOManager;
 }
 
-TextureManager &Engine::GetTextureManager() {
+TextureManager &engine::GetTextureManager() {
     return mTextureManager;
 }
 
-void Engine::SetupTextures() {
+void engine::SetupTextures() {
     mTextureManager.CreateTextureFromFile("../data/textures/metal_roof_diff_512x512.png", "tex_object0", GL_TEXTURE_2D, 0);
     mTextureManager.CreateTextureFromFile("../data/textures/metal_roof_spec_512x512.png", "tex_object1", GL_TEXTURE_2D, 1);
 }
 
-void Engine::SkipFrame(int Frames) {
+void engine::SkipFrame(int Frames) {
     leftSkipFrames += Frames + 1;
 }
 
-void Engine::SwapToMainWindow() {
+void engine::SwapToMainWindow() {
     glfwMakeContextCurrent(m_pWindow);
 //    glEnable(GL_DEPTH_TEST);
 //    glEnable(GL_CULL_FACE);
@@ -482,13 +481,13 @@ void Engine::SwapToMainWindow() {
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void Engine::SwapToGUIWindow() {
+void engine::SwapToGUIWindow() {
     glfwMakeContextCurrent(m_pGUIWindow);
 
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void Engine::SetupFBO() {
+void engine::SetupFBO() {
     const glm::vec2 gBufferResolution = GetWindowSize();
     //Init gBuffer
     gBuffer.Init(gBufferResolution.x, gBufferResolution.y);

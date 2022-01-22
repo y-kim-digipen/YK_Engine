@@ -10,18 +10,17 @@ out VS_OUT
 {
     vec4 vertexPosition; // interpolated vPosition
     vec2 vertexUV;
-
 } vs_out;
 
-out mat4  vTransform;
+//out mat4  vTransform;
 
 void main()
 {
     //    vs_out.vertexPosition = vertexTransform *  vec4( vPosition, 1.0f );
-    vs_out.vertexPosition = vec4( vPosition, 1.0f );
+    vs_out.vertexPosition = vertexTransform * vec4( vPosition, 1.0f );
     vs_out.vertexUV = vUV;
 
-    vTransform = vertexTransform;
+//    vTransform = vertexTransform;
 
     gl_Position = vs_out.vertexPosition;
 }

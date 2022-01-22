@@ -16,13 +16,13 @@ End Header --------------------------------------------------------*/
 #include <glm/gtc/epsilon.hpp>
 #include <GL/glew.h>
 
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "VAOManager.h"
 
 void Mesh::Init() {
-    Engine::GetVBOManager().SetUpVBO(this);
+    engine::GetVBOManager().SetUpVBO(this);
 }
 
 // Initialize the data members in the mesh
@@ -589,7 +589,7 @@ void Mesh::ChangeUVType(Mesh::UVType newType) {
     }
     vertexUVs.clear();
     vertexUVs = preCalculatedUVs[newType];
-    Engine::GetVBOManager().ChangeVBOData(mName, "vUV", GL_ARRAY_BUFFER, vertexUVs.size() * sizeof(glm::vec2), (GLvoid*)vertexUVs.data());
+    engine::GetVBOManager().ChangeVBOData(mName, "vUV", GL_ARRAY_BUFFER, vertexUVs.size() * sizeof(glm::vec2), (GLvoid*)vertexUVs.data());
 }
 
 Mesh::UVType Mesh::GetCurrentUsingCPUMeshUV() const {

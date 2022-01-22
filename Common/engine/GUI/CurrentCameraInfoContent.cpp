@@ -12,7 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "CurrentCameraInfoContent.h"
 
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "engine/scene/SceneBase.h"
 #include "engine/scene_objects/Camera.h"
 
@@ -38,7 +38,7 @@ namespace GUI{
     }
 
     std::shared_ptr<Camera> CurrentCameraInfoContent::GetCurrentActiveCamera() const {
-        auto pCurrentScene = Engine::GetCurrentScene();
+        auto pCurrentScene = engine::GetCurrentScene();
         if(!pCurrentScene){
             return nullptr;
         }

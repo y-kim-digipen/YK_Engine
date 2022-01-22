@@ -80,14 +80,22 @@ double OBJReader::ReadOBJFile(std::string filepath, Mesh *pMesh,
               << timeDuration
               << "  milli seconds." << std::endl;
 
-
+    if(!_currentMesh->vertexUVs.empty())
+    {
+        _currentMesh->preCalculatedUVs.insert(std::make_pair(Mesh::OBJECT_DEFINED_UV, _currentMesh->vertexUVs));
+    }
     // Now calculate vertex normals
     _currentMesh->calcVertexNormals(bFlipNormals);
     _currentMesh->calcFaceNormals(bFlipNormals);
+
     _currentMesh->calcUVs(Mesh::CYLINDRICAL_UV);
     _currentMesh->calcUVs(Mesh::SPHERICAL_UV);
     _currentMesh->calcUVs(Mesh::CUBE_MAPPED_UV);
     _currentMesh->calcUVs(Mesh::PLANAR_UV);
+    if(_currentMesh->preCalculatedUVs.count(Mesh::OBJECT_DEFINED_UV))
+    {
+        _currentMesh->ChangeUVType(Mesh::OBJECT_DEFINED_UV);
+    }
 
     return timeDuration;
 }
@@ -263,6 +271,26 @@ void OBJReader::ParseOBJRecord( char *buffer, glm::vec3 &min, glm::vec3 &max )
                 vNormal[2] = static_cast<GLfloat &&>(atof(token));
 
                 _currentMesh->vertexNormals.push_back( glm::normalize(vNormal) );
+            }
+
+            // vertex uvs
+            else if( token[1] == 't' )
+            {
+                glm::vec2 vUV;
+
+                token = strtok( nullptr, delims );
+                if( token == nullptr )
+                    break;
+
+                vUV[0] = static_cast<GLfloat &&>(atof(token));
+
+                token = strtok( nullptr, delims );
+                if( token == nullptr )
+                    break;
+
+                vUV[1] = static_cast<GLfloat &&>(atof(token));
+
+                _currentMesh->vertexUVs.push_back( vUV );
             }
 
             break;

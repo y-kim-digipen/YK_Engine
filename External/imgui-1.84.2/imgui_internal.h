@@ -31,7 +31,7 @@ Index of this file:
 // [SECTION] Table support
 // [SECTION] ImGui internal API
 // [SECTION] ImFontAtlas internal API
-// [SECTION] Test Engine specific hooks (imgui_test_engine)
+// [SECTION] Test engine specific hooks (imgui_test_engine)
 
 */
 
@@ -2716,7 +2716,7 @@ IMGUI_API void      ImFontAtlasBuildMultiplyCalcLookupTable(unsigned char out_ta
 IMGUI_API void      ImFontAtlasBuildMultiplyRectAlpha8(const unsigned char table[256], unsigned char* pixels, int x, int y, int w, int h, int stride);
 
 //-----------------------------------------------------------------------------
-// [SECTION] Test Engine specific hooks (imgui_test_engine)
+// [SECTION] Test engine specific hooks (imgui_test_engine)
 //-----------------------------------------------------------------------------
 
 #ifdef IMGUI_ENABLE_TEST_ENGINE

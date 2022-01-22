@@ -18,7 +18,7 @@ End Header --------------------------------------------------------*/
 #include <vector>
 
 #include <GL/gl.h>
-#include "engine/CommonConstants.h"
+#include "engine/common_constants.h"
 
 
 class Shader;

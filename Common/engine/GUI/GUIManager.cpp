@@ -18,7 +18,7 @@ End Header --------------------------------------------------------*/
 
 #include "GUIWindow.h"
 #include "EngineInfo.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 
 namespace GUI {
     void GUI_Manager::Init(GLFWwindow *m_pWindow) {
@@ -110,7 +110,7 @@ namespace GUI {
         ImGui_ImplGlfw_InitForOpenGL(m_pWindow, true);
         ImGui_ImplOpenGL3_Init("#version 410");
 
-        m_pWindows.try_emplace("Engine Info Window", new EngineInfo("Engine Info Window"));
+        m_pWindows.try_emplace("engine Info Window", new EngineInfo("engine Info Window"));
 
         InitWindows();
     }

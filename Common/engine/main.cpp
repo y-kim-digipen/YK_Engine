@@ -10,16 +10,16 @@ Project: y.kim_CS300_2
 Author: Yoonki Kim, y.kim,  180002421
 Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
-#include "Engine.h"
+#include "engine.h"
 
 int main(){
 
-    Engine::InitWindow(glm::vec2{1600, 900}, "Assignment 2");
-    Engine::InitEngine();
+    engine::InitWindow(glm::vec2{1600, 900}, "Assignment 2");
+    engine::InitEngine();
 
     do{
-        Engine::Update();
-        } while (Engine::IsRunning());
-    Engine::CleanUp();
+        engine::Update();
+        } while (engine::IsRunning());
+    engine::CleanUp();
     return 0;
 }

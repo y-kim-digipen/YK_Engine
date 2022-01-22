@@ -16,7 +16,7 @@ End Header --------------------------------------------------------*/
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <iostream>
-#include "engine/Engine.h"
+#include "engine/engine.h"
 #include "engine/graphic_misc/Shader.h"
 #include "engine/scene/SceneBase.h"
 #include "Camera.h"
@@ -47,7 +47,7 @@ Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared
 }
 
 Object::Object(const std::string& name, const std::string &meshStr, const std::string &shaderStr)
-        : Object(name, Engine::GetMesh(meshStr), Engine::GetShader(shaderStr)) {
+        : Object(name, engine::GetMesh(meshStr), engine::GetShader(shaderStr)) {
     mMeshName = meshStr;
     mShaderName = shaderStr;
 }
@@ -85,9 +85,9 @@ void Object::RenderModel() const {
 
     //setting&binding buffer
     auto& attributeInfos = m_pShader->GetAttribInfos();
-    const GLuint VAO_ID = Engine::GetVAOManager().GetVAO(m_pShader->GetAttributeID());
+    const GLuint VAO_ID = engine::GetVAOManager().GetVAO(m_pShader->GetAttributeID());
 
-    auto& VBOInfo = Engine::GetVBOManager().GetVBOInfo(m_pMesh);
+    auto& VBOInfo = engine::GetVBOManager().GetVBOInfo(m_pMesh);
 
     if(mUsingTexture){
         const int textureSlotSize = mTextureSlots.size();
@@ -98,24 +98,14 @@ void Object::RenderModel() const {
             {
                 continue;
             }
-            TextureObject* pTextureObj = Engine::GetTextureManager().FindTextureByName(usingTextureString);
+            TextureObject* pTextureObj = engine::GetTextureManager().FindTextureByName(usingTextureString);
             if(pTextureObj == nullptr)
             {
                 continue;
             }
-            Engine::GetTextureManager().BindTexture(pTextureObj);
+            engine::GetTextureManager().BindTexture(pTextureObj);
             pTextureObj->SendToShader(m_pShader, i);
         }
-//        for(const std::string& textureName : mTextureSlots)
-//        {
-//            if(textureName.length() == 0)
-//            {
-//                continue;
-//            }
-//            TextureObject* pTextureObj = Engine::GetTextureManager().FindTextureByName(textureName);
-//            Engine::GetTextureManager().BindTexture(pTextureObj);
-//            pTextureObj->SetTextureUniform(m_pShader);
-//        }
     }
 
     glBindVertexArray(VAO_ID);
@@ -139,7 +129,7 @@ void Object::RenderModel() const {
     GLint vNormalTransformLoc = glGetUniformLocation(shaderPID, "vertexNormalTransform");
 
 
-    const auto& pCam = Engine::GetCurrentScene()->GetCurrentCamera();
+    const auto& pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
     //Get matricies
     glm::mat4 modelToWorldMatrix = GetObjectToWorldMatrix();
@@ -176,14 +166,14 @@ void Object::RenderModel() const {
 }
 
 void Object::RenderVertexNormal() const {
-    auto pNormalDrawShader = Engine::GetShader("NormalDrawShader");
+    auto pNormalDrawShader = engine::GetShader("NormalDrawShader");
     const GLint shaderPID = pNormalDrawShader->GetProgramID();
 
     //setting&binding buffer
     auto& attributeInfos = pNormalDrawShader->GetAttribInfos();
-    const GLuint VAOID = Engine::GetVAOManager().GetVAO(Engine::GetShader("NormalDrawShader")->GetAttributeID());
+    const GLuint VAOID = engine::GetVAOManager().GetVAO(engine::GetShader("NormalDrawShader")->GetAttributeID());
 
-    auto& VBOInfo = Engine::GetVBOManager().GetVBOInfo(m_pMesh);
+    auto& VBOInfo = engine::GetVBOManager().GetVBOInfo(m_pMesh);
 
     glBindVertexArray(VAOID);
     for(auto& attribute : attributeInfos){
@@ -203,7 +193,7 @@ void Object::RenderVertexNormal() const {
     if(vTransformLoc < 0){
         std::cerr << "Unable to find uniform variable!" << std::endl;
     }
-    const auto& pCam = Engine::GetCurrentScene()->GetCurrentCamera();
+    const auto& pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
     //Get matricies
     glm::mat4 modelToWorldMatrix = GetObjectToWorldMatrix();
@@ -224,14 +214,14 @@ void Object::RenderVertexNormal() const {
 }
 
 void Object::RenderFaceNormal() const {
-    auto pNormalDrawShader = Engine::GetShader("FaceNormalDrawShader");
+    auto pNormalDrawShader = engine::GetShader("FaceNormalDrawShader");
     const GLint shaderPID = pNormalDrawShader->GetProgramID();
 
     //setting&binding buffer
     auto& attributeInfos = pNormalDrawShader->GetAttribInfos();
-    const GLuint VAOID = Engine::GetVAOManager().GetVAO(Engine::GetShader("FaceNormalDrawShader")->GetAttributeID());
+    const GLuint VAOID = engine::GetVAOManager().GetVAO(engine::GetShader("FaceNormalDrawShader")->GetAttributeID());
 
-    auto& VBOInfo = Engine::GetVBOManager().GetVBOInfo(m_pMesh);
+    auto& VBOInfo = engine::GetVBOManager().GetVBOInfo(m_pMesh);
 
     glBindVertexArray(VAOID);
     for(auto& attribute : attributeInfos){
@@ -250,7 +240,7 @@ void Object::RenderFaceNormal() const {
     //Drawing Logic
     glUseProgram(shaderPID);
     GLint vTransformLoc = glGetUniformLocation(shaderPID, "vertexTransform");
-    const auto& pCam = Engine::GetCurrentScene()->GetCurrentCamera();
+    const auto& pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
     //Get matricies
     glm::mat4 modelToWorldMatrix = GetObjectToWorldMatrix();
@@ -290,7 +280,7 @@ void Object::CleanUp() const {
 }
 
 bool Object::SetShader(const std::string &shaderStr) {
-    auto pShader = Engine::GetShader(shaderStr);
+    auto pShader = engine::GetShader(shaderStr);
     if(pShader){
         m_pShader->DeleteShaderBuffer(mObjectName);
         m_pShader = pShader;
@@ -307,7 +297,7 @@ bool Object::SetShader(const std::string &shaderStr) {
 }
 
 bool Object::SetMesh(const std::string &meshStr) {
-    auto pMesh = Engine::GetMesh(meshStr);
+    auto pMesh = engine::GetMesh(meshStr);
     if(pMesh){
         //todo init mesh here
         m_pMesh = pMesh;

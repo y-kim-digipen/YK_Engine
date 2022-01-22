@@ -12,7 +12,7 @@ Creation date: Nov 7, 2021
 End Header --------------------------------------------------------*/
 #include "LightDetailContent.h"
 
-#include "engine/Engine.h"
+#include "engine/engine.h"
 
 namespace GUI
 {
@@ -93,7 +93,7 @@ namespace GUI
 
             if (ImGui::BeginTabItem("Assets")) {
                 //selectable shader
-                const auto &shaderList = Engine::GetShaderManager().GetNameList();
+                const auto &shaderList = engine::GetShaderManager().GetNameList();
                 const std::string &currentShaderName = m_pTargetLight->GetUsingShaderName();
                 if (ImGui::BeginCombo("ShaderList", currentShaderName.c_str())) {
                     for (const auto &shaderName: shaderList) {
@@ -109,7 +109,7 @@ namespace GUI
                 }
 
                 //selectable mesh
-                const auto &meshList = Engine::GetMeshManager().GetNameList();
+                const auto &meshList = engine::GetMeshManager().GetNameList();
                 const std::string &currentMeshName = m_pTargetLight->GetUsingMeshName();
                 if (ImGui::BeginCombo("MeshList", currentMeshName.c_str())) {
                     for (const auto &meshName: meshList) {

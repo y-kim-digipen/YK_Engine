@@ -13,7 +13,7 @@ End Header --------------------------------------------------------*/
 
 #include "FBO.h"
 #include "TextureObject.h"
-#include "engine/Engine.h"
+#include "engine/engine.h"
 
 #include <iostream>
 void FBO::Init(GLuint width, GLuint height) {
@@ -40,7 +40,7 @@ void FBO::SetAttachment(GLenum slot, TextureObject *texture, GLuint level) {
     mAttachments[slot] = texture;
     mDrawBuffers.push_back(slot);
 
-//    Engine::GetTextureManager().RegisterFromPointer(std::to_string(mFBOHandle) + "_" + std::to_string(slot) + "_" + std::to_string(texture->GetHandle()), texture);
+//    engine::GetTextureManager().RegisterFromPointer(std::to_string(mFBOHandle) + "_" + std::to_string(slot) + "_" + std::to_string(texture->GetHandle()), texture);
 }
 
 void FBO::SetDepthAttachment() {

@@ -13,7 +13,7 @@ End Header --------------------------------------------------------*/
 #include "TestScene.h"
 #include <glm/gtx/transform.hpp>
 #include <random>
-#include "engine/Engine.h"
+#include "engine/engine.h"
 using std::placeholders::_1;
 void TestScene::Init() {
     SceneBase::Init();
@@ -40,12 +40,12 @@ void TestScene::Init() {
         }
 
         //////////////Drawing Logic//////////////
-        const GLint shaderPID = Engine::GetShader("FaceNormalDrawShader")->GetProgramID();
+        const GLint shaderPID = engine::GetShader("FaceNormalDrawShader")->GetProgramID();
 
         //setting&binding buffer
-        auto &attributeInfos = Engine::GetShader("FaceNormalDrawShader")->GetAttribInfos();
-        const GLuint VAOID = Engine::GetVAOManager().GetVAO(
-                Engine::GetShader("FaceNormalDrawShader")->GetAttributeID());
+        auto &attributeInfos = engine::GetShader("FaceNormalDrawShader")->GetAttribInfos();
+        const GLuint VAOID = engine::GetVAOManager().GetVAO(
+                engine::GetShader("FaceNormalDrawShader")->GetAttributeID());
 
         glBindVertexArray(VAOID);
         for (auto &attribute: attributeInfos) {
@@ -68,7 +68,7 @@ void TestScene::Init() {
         if (vTransformLoc < 0) {
             std::cerr << "Unable to find uniform variable!" << std::endl;
         }
-        const auto &pCam = Engine::GetCurrentScene()->GetCurrentCamera();
+        const auto &pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
         glm::mat4 tempToWorld(1.f);
         tempToWorld = glm::translate(tempToWorld, obj->GetPosition());

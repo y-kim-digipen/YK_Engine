@@ -25,82 +25,73 @@ add_executable( ${TARGET_NAME}
         ../External/imgui-1.84.2/imgui_impl_opengl3.h
         ../External/imgui-1.84.2/imgui_impl_opengl3_loader.h
         #IMGUI_END
-        engine/CommonConstants.h
-        engine/graphic_misc/Shader.cpp
-        engine/graphic_misc/Shader.h
-        #        ../Common/Utilities.cpp
-        #        ../Common/Utilities.h
-        #        ../Common/SceneManager.cpp
-        #        ../Common/SceneManager.h
-        engine/graphic_misc/OBJReader.cpp
-        engine/graphic_misc/OBJReader.h
-        engine/graphic_misc/Mesh.cpp
-        engine/graphic_misc/Mesh.h
-        #        ../Common/VertexDataManager.cpp
-        #        ../Common/VertexDataManager.h
-        #        ../Common/UniformBufferManager.cpp
-        #        ../Common/UniformBufferManager.h
-        #        ../Common/TextureManager.cpp
-        #        ../Common/TextureManager.h
-        #        ../Common/TextureManager430.cpp
-        #        ../Common/TextureManager430.h
-        #        ../Common/ShaderManager.cpp
-        #        ../Common/ShaderManager.h
-        #        ../Common/GeometryShaderManager.cpp
-        #        ../Common/GeometryShaderManager.h
-        #        ../Common/Light.cpp
-        #        ../Common/Light.h
-        input/KeyCodes.h
-        input/InputManager.cpp
-        input/InputManager.h
-        engine/Engine.cpp
-        engine/Engine.h
-        engine/graphic_misc/Color.h
-        engine/scene/SceneBase.h
-        object_components/ComponentBase.h
-        object_components/ComponentManager.h
-        object_components/ComponentManager.inl
-        engine/scene/TestScene.h
-        engine/scene_objects/Object.cpp
-        engine/scene_objects/Object.h
-        engine/scene_objects/Camera.cpp
-        engine/scene_objects/Camera.h
-        engine/scene/SceneBase.cpp
-        engine/scene_objects/Light.h
-        #GUI stuffs begin
-        engine/GUI/GUIManager.h
-        engine/GUI/GUIManager.cpp
-        engine/GUI/GUIObject.h
-        engine/GUI/GUIWindow.cpp
-        engine/GUI/GUIWindow.h
-        engine/GUI/GUIContent.h
-        engine/GUI/CurrentCameraInfoContent.h
-        engine/GUI/CurrentCameraInfoContent.cpp
-        engine/GUI/EngineInfo.cpp
-        engine/GUI/EngineInfo.h
-        engine/GUI/ObjectListContent.cpp
-        engine/GUI/ObjectListContent.h
-        #GUI stuffs end
+        engine/common_constants.h
+        ../Common/engine/graphic_misc/Shader.cpp
+        ../Common/engine/graphic_misc/Shader.h
 
-        engine/GUI/ColorSet.h
-        engine/GUI/ObjectDetailContent.cpp
-        engine/GUI/ObjectDetailContent.h
-        engine/graphic_misc/VAOManager.cpp
-        engine/graphic_misc/VAOManager.h
-        engine/graphic_misc/VBOManager.cpp
-        engine/graphic_misc/VBOManager.h
-        engine/graphic_misc/UBO.cpp
-        engine/graphic_misc/UBO.h
-        engine/GUI/LightListContent.cpp
-        engine/GUI/LightListContent.h
-        engine/GUI/LightDetailContent.cpp
-        engine/GUI/LightDetailContent.h
-        engine/graphic_misc/Environment.h
-        engine/graphic_misc/TextureManager.cpp
-        engine/graphic_misc/TextureManager.h
-        engine/graphic_misc/TextureObject.cpp
-        engine/graphic_misc/TextureObject.h
-        engine/GUI/EngineInfoContent.cpp engine/GUI/EngineInfoContent.h engine/scene/TestScene.cpp engine/graphic_misc/FBO.h engine/graphic_misc/FBO.cpp)
+        ../Common/engine/graphic_misc/OBJReader.cpp
+        ../Common/engine/graphic_misc/OBJReader.h
+        ../Common/engine/graphic_misc/Mesh.cpp
+        ../Common/engine/graphic_misc/Mesh.h
+
+        ../Common/engine/input/KeyCodes.h
+        ../Common/engine/input/InputManager.cpp
+        ../Common/engine/input/InputManager.h
+        engine/engine.cpp
+        engine/engine.h
+        ../Common/engine/graphic_misc/Color.h
+        ../Common/engine/scene/SceneBase.h
+        ../Common/object_components/ComponentBase.h
+        ../Common/object_components/ComponentManager.h
+        ../Common/object_components/ComponentManager.inl
+        ../Common/engine/scene/TestScene.h
+        ../Common/engine/scene_objects/Object.cpp
+        ../Common/engine/scene_objects/Object.h
+        ../Common/engine/scene_objects/Camera.cpp
+        ../Common/engine/scene_objects/Camera.h
+        ../Common/engine/scene/SceneBase.cpp
+        ../Common/engine/scene_objects/Light.h
+
+        ../Common/engine/GUI/ColorSet.h
+        ../Common/engine/GUI/ObjectDetailContent.cpp
+        ../Common/engine/GUI/ObjectDetailContent.h
+        ../Common/engine/graphic_misc/VAOManager.cpp
+        ../Common/engine/graphic_misc/VAOManager.h
+        ../Common/engine/graphic_misc/VBOManager.cpp
+        ../Common/engine/graphic_misc/VBOManager.h
+        ../Common/engine/graphic_misc/UBO.cpp
+        ../Common/engine/graphic_misc/UBO.h
+
+        ../Common/engine/graphic_misc/Environment.h
+        ../Common/engine/graphic_misc/TextureManager.cpp
+        ../Common/engine/graphic_misc/TextureManager.h
+        ../Common/engine/graphic_misc/TextureObject.cpp
+        ../Common/engine/graphic_misc/TextureObject.h
+
+        ../Common/engine/scene/TestScene.cpp
+        ../Common/engine/graphic_misc/FBO.h
+        ../Common/engine/graphic_misc/FBO.cpp
+
+        #GUI
+        ../Common/engine/GUI/EngineInfoContent.cpp
+        ../Common/engine/GUI/EngineInfoContent.h
+        ../Common/engine/GUI/LightListContent.cpp
+        ../Common/engine/GUI/LightListContent.h
+        ../Common/engine/GUI/LightDetailContent.cpp
+        ../Common/engine/GUI/LightDetailContent.h
+        ../Common/engine/GUI/GUIManager.h
+        ../Common/engine/GUI/GUIManager.cpp
+        ../Common/engine/GUI/GUIObject.h
+        ../Common/engine/GUI/GUIWindow.cpp
+        ../Common/engine/GUI/GUIWindow.h
+        ../Common/engine/GUI/GUIContent.h
+        ../Common/engine/GUI/CurrentCameraInfoContent.h
+        ../Common/engine/GUI/CurrentCameraInfoContent.cpp
+        ../Common/engine/GUI/EngineInfo.cpp
+        ../Common/engine/GUI/EngineInfo.h
+        ../Common/engine/GUI/ObjectListContent.cpp
+        ../Common/engine/GUI/ObjectListContent.h
+        )
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )
