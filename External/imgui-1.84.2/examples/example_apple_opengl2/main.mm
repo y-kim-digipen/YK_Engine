@@ -155,7 +155,7 @@
 -(void)dealloc                              { animationTimer = nil; }
 
 //-----------------------------------------------------------------------------------
-// Input processing
+// input processing
 //-----------------------------------------------------------------------------------
 
 // Forward Mouse/Keyboard events to Dear ImGui OSX backend.

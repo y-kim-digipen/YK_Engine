@@ -115,7 +115,7 @@ static void SetupVulkan(const char** extensions, uint32_t extensions_count)
         check_vk_result(err);
 
         // If a number >1 of GPUs got reported, find discrete GPU if present, or use first one available. This covers
-        // most common cases (multi-gpu/integrated+dedicated graphics). Handling more complicated setups (multiple
+        // most common cases (multi-gpu/integrated+dedicated graphic_misc). Handling more complicated setups (multiple
         // dedicated GPUs) is out of scope of this sample.
         int use_gpu = 0;
         for (int i = 0; i < (int)gpu_count; i++)
@@ -133,7 +133,7 @@ static void SetupVulkan(const char** extensions, uint32_t extensions_count)
         free(gpus);
     }
 
-    // Select graphics queue family
+    // Select graphic_misc queue family
     {
         uint32_t count;
         vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, NULL);

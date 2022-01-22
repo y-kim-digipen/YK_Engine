@@ -38,7 +38,7 @@ int main(int, char**)
     if (!glfwInit())
         return 1;
 
-    // Make sure GLFW does not initialize any graphics context.
+    // Make sure GLFW does not initialize any graphic_misc context.
     // This needs to be done explicitly later
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 

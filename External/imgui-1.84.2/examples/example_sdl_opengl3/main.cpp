@@ -1,5 +1,5 @@
 // Dear ImGui: standalone example application for SDL2 + OpenGL
-// (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
+// (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphic_misc context creation, etc.)
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
@@ -49,7 +49,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif
 
-    // Create window with graphics context
+    // Create window with graphic_misc context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);

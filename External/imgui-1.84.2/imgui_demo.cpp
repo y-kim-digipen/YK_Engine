@@ -619,7 +619,7 @@ static void ShowDemoWindowWidgets()
 
         {
             // To wire InputText() with std::string or any other custom string type,
-            // see the "Text Input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
+            // see the "Text input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
             static char str0[128] = "Hello, world!";
             ImGui::InputText("input text", str0, IM_ARRAYSIZE(str0));
             ImGui::SameLine(); HelpMarker(
@@ -1260,10 +1260,10 @@ static void ShowDemoWindowWidgets()
     }
 
     // To wire InputText() with std::string or any other custom string type,
-    // see the "Text Input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
-    if (ImGui::TreeNode("Text Input"))
+    // see the "Text input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
+    if (ImGui::TreeNode("Text input"))
     {
-        if (ImGui::TreeNode("Multi-line Text Input"))
+        if (ImGui::TreeNode("Multi-line Text input"))
         {
             // Note: we are using a fixed-sized buffer for simplicity here. See ImGuiInputTextFlags_CallbackResize
             // and the code in misc/cpp/imgui_stdlib.h for how to setup InputText() for dynamically resizing strings.
@@ -1288,7 +1288,7 @@ static void ShowDemoWindowWidgets()
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNode("Filtered Text Input"))
+        if (ImGui::TreeNode("Filtered Text input"))
         {
             struct TextFilters
             {
@@ -1310,7 +1310,7 @@ static void ShowDemoWindowWidgets()
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNode("Password Input"))
+        if (ImGui::TreeNode("Password input"))
         {
             static char password[64] = "password123";
             ImGui::InputText("password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
@@ -4257,7 +4257,7 @@ static void ShowDemoWindowTables()
                 ImGui::AlignTextToFramePadding(); // FIXME-TABLE: Workaround for wrong text baseline propagation
                 ImGui::Text("'%s'", column_names[column]);
                 ImGui::Spacing();
-                ImGui::Text("Input flags:");
+                ImGui::Text("input flags:");
                 EditTableColumnsFlags(&column_flags[column]);
                 ImGui::Spacing();
                 ImGui::Text("Output flags:");
@@ -6152,7 +6152,7 @@ static void ShowExampleMenuFile()
         static float f = 0.5f;
         static int n = 0;
         ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
-        ImGui::InputFloat("Input", &f, 0.1f);
+        ImGui::InputFloat("input", &f, 0.1f);
         ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
         ImGui::EndMenu();
     }
@@ -6373,7 +6373,7 @@ struct ExampleAppConsole
         // Command-line
         bool reclaim_focus = false;
         ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-        if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags, &TextEditCallbackStub, (void*)this))
+        if (ImGui::InputText("input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags, &TextEditCallbackStub, (void*)this))
         {
             char* s = InputBuf;
             Strtrim(s);

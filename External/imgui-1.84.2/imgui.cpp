@@ -180,7 +180,7 @@ CODE
    Effectively it means you can create widgets at any time in your code, regardless of considerations of being in "update" vs "render"
    phases of your own application. All rendering information is stored into command-lists that you will retrieve after calling ImGui::Render().
  - Refer to the backends and demo applications in the examples/ folder for instruction on how to setup your code.
- - If you are running over a standard OS with a common graphics API, you should be able to use unmodified imgui_impl_*** files from the examples/ folder.
+ - If you are running over a standard OS with a common graphic_misc API, you should be able to use unmodified imgui_impl_*** files from the examples/ folder.
 
 
  HOW A SIMPLE APPLICATION MAY LOOK LIKE
@@ -308,7 +308,7 @@ CODE
                  // The vast majority of draw calls will use the Dear ImGui texture atlas, which value you have set yourself during initialization.
                  MyEngineBindTexture((MyTexture*)pcmd->GetTexID());
 
-                 // We are using scissoring to clip some objects. All low-level graphics API should support it.
+                 // We are using scissoring to clip some objects. All low-level graphic_misc API should support it.
                  // - If your engine doesn't support scissoring yet, you may ignore this at first. You will get some small glitches
                  //   (some elements visible outside their bounds) but you can fix that once everything else works!
                  // - Clipping coordinates are provided in imgui coordinates space:
@@ -316,7 +316,7 @@ CODE
                  //   - In a single viewport application, draw_data->DisplayPos == (0,0) and draw_data->DisplaySize == io.DisplaySize, but always use GetMainViewport()->Pos/Size instead of hardcoding those values.
                  //   - In the interest of supporting multi-viewport applications (see 'docking' branch on github),
                  //     always subtract draw_data->DisplayPos from clipping bounds to convert them to your viewport space.
-                 // - Note that pcmd->ClipRect contains Min+Max bounds. Some graphics API may use Min+Max, other may use Min+Size (size being Max-Min)
+                 // - Note that pcmd->ClipRect contains Min+Max bounds. Some graphic_misc API may use Min+Max, other may use Min+Size (size being Max-Min)
                  ImVec2 pos = draw_data->DisplayPos;
                  MyEngineScissor((int)(pcmd->ClipRect.x - pos.x), (int)(pcmd->ClipRect.y - pos.y), (int)(pcmd->ClipRect.z - pos.x), (int)(pcmd->ClipRect.w - pos.y));
 
@@ -526,7 +526,7 @@ CODE
  - 2018/03/08 (1.60) - changed ImFont::DisplayOffset.y to default to 0 instead of +1. Fixed rounding of Ascent/Descent to match TrueType renderer. If you were adding or subtracting to ImFont::DisplayOffset check if your fonts are correctly aligned vertically.
  - 2018/03/03 (1.60) - renamed ImGuiStyleVar_Count_ to ImGuiStyleVar_COUNT and ImGuiMouseCursor_Count_ to ImGuiMouseCursor_COUNT for consistency with other public enums.
  - 2018/02/18 (1.60) - BeginDragDropSource(): temporarily removed the optional mouse_button=0 parameter because it is not really usable in many situations at the moment.
- - 2018/02/16 (1.60) - obsoleted the io.RenderDrawListsFn callback, you can call your graphics engine render function after ImGui::Render(). Use ImGui::GetDrawData() to retrieve the ImDrawData* to display.
+ - 2018/02/16 (1.60) - obsoleted the io.RenderDrawListsFn callback, you can call your graphic_misc engine render function after ImGui::Render(). Use ImGui::GetDrawData() to retrieve the ImDrawData* to display.
  - 2018/02/07 (1.60) - reorganized context handling to be more explicit,
                        - YOU NOW NEED TO CALL ImGui::CreateContext() AT THE BEGINNING OF YOUR APP, AND CALL ImGui::DestroyContext() AT THE END.
                        - removed Shutdown() function, as DestroyContext() serve this purpose.
@@ -1111,7 +1111,7 @@ ImGuiIO::ImGuiIO()
     ImeSetInputScreenPosFn = ImeSetInputScreenPosFn_DefaultImpl;
     ImeWindowHandle = NULL;
 
-    // Input (NB: we already have memset zero the entire structure!)
+    // input (NB: we already have memset zero the entire structure!)
     MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
     MousePosPrev = ImVec2(-FLT_MAX, -FLT_MAX);
     MouseDragThreshold = 6.0f;
@@ -4077,7 +4077,7 @@ void ImGui::NewFrame()
 
     g.MouseCursor = ImGuiMouseCursor_Arrow;
     g.WantCaptureMouseNextFrame = g.WantCaptureKeyboardNextFrame = g.WantTextInputNextFrame = -1;
-    g.PlatformImePos = ImVec2(1.0f, 1.0f); // OS Input Method Editor showing on top-left of our window by default
+    g.PlatformImePos = ImVec2(1.0f, 1.0f); // OS input Method Editor showing on top-left of our window by default
 
     // Mouse wheel scrolling, scale
     UpdateMouseWheel();
@@ -4319,12 +4319,12 @@ static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* d
     // - If you want large meshes with more than 64K vertices, you can either:
     //   (A) Handle the ImDrawCmd::VtxOffset value in your renderer backend, and set 'io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset'.
     //       Most example backends already support this from 1.71. Pre-1.71 backends won't.
-    //       Some graphics API such as GL ES 1/2 don't have a way to offset the starting vertex so it is not supported for them.
+    //       Some graphic_misc API such as GL ES 1/2 don't have a way to offset the starting vertex so it is not supported for them.
     //   (B) Or handle 32-bit indices in your renderer backend, and uncomment '#define ImDrawIdx unsigned int' line in imconfig.h.
     //       Most example backends already support this. For example, the OpenGL example code detect index size at compile-time:
     //         glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
     //       Your own engine or render API may use different parameters or function calls to specify index sizes.
-    //       2 and 4 bytes indices are generally supported by most graphics API.
+    //       2 and 4 bytes indices are generally supported by most graphic_misc API.
     // - If for some reason neither of those solutions works for you, a workaround is to call BeginChild()/EndChild() before reaching
     //   the 64K limit to split your draw commands in multiple draw lists.
     if (sizeof(ImDrawIdx) == 2)
@@ -4425,7 +4425,7 @@ void ImGui::EndFrame()
 
     ErrorCheckEndFrameSanityChecks();
 
-    // Notify OS when our Input Method Editor cursor has moved (e.g. CJK inputs using Microsoft IME)
+    // Notify OS when our input Method Editor cursor has moved (e.g. CJK inputs using Microsoft IME)
     if (g.IO.ImeSetInputScreenPosFn && (g.PlatformImeLastPos.x == FLT_MAX || ImLengthSqr(g.PlatformImeLastPos - g.PlatformImePos) > 0.0001f))
     {
         g.IO.ImeSetInputScreenPosFn((int)g.PlatformImePos.x, (int)g.PlatformImePos.y);
@@ -4485,7 +4485,7 @@ void ImGui::EndFrame()
     // Unlock font atlas
     g.IO.Fonts->Locked = false;
 
-    // Clear Input data for next frame
+    // Clear input data for next frame
     g.IO.MouseWheel = g.IO.MouseWheelH = 0.0f;
     g.IO.InputQueueCharacters.resize(0);
     g.IO.KeyModsPrev = g.IO.KeyMods; // doing it here is better than in NewFrame() as we'll tolerate backend writing to KeyMods. If we want to firmly disallow it we should detect it.
@@ -4495,7 +4495,7 @@ void ImGui::EndFrame()
 }
 
 // Prepare the data for rendering so you can call GetDrawData()
-// (As with anything within the ImGui:: namspace this doesn't touch your GPU or graphics API at all:
+// (As with anything within the ImGui:: namspace this doesn't touch your GPU or graphic_misc API at all:
 // it is the role of the ImGui_ImplXXXX_RenderDrawData() function provided by the renderer backend)
 void ImGui::Render()
 {
@@ -10895,7 +10895,7 @@ static void SetClipboardTextFn_DefaultImpl(void*, const char* text)
 
 static void ImeSetInputScreenPosFn_DefaultImpl(int x, int y)
 {
-    // Notify OS Input Method Editor of text input position
+    // Notify OS input Method Editor of text input position
     ImGuiIO& io = ImGui::GetIO();
     if (HWND hwnd = (HWND)io.ImeWindowHandle)
         if (HIMC himc = ::ImmGetContext(hwnd))
@@ -11565,7 +11565,7 @@ void ImGui::DebugNodeFont(ImFont* font)
     for (int config_i = 0; config_i < font->ConfigDataCount; config_i++)
         if (font->ConfigData)
             if (const ImFontConfig* cfg = &font->ConfigData[config_i])
-                BulletText("Input %d: \'%s\', Oversample: (%d,%d), PixelSnapH: %d, Offset: (%.1f,%.1f)",
+                BulletText("input %d: \'%s\', Oversample: (%d,%d), PixelSnapH: %d, Offset: (%.1f,%.1f)",
                     config_i, cfg->Name, cfg->OversampleH, cfg->OversampleV, cfg->PixelSnapH, cfg->GlyphOffset.x, cfg->GlyphOffset.y);
 
     // Display all glyphs of the fonts in separate pages of 256 characters

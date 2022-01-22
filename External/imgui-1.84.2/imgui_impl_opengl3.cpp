@@ -509,7 +509,7 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 
-    // Upload texture to graphics system
+    // Upload texture to graphic_misc system
     GLint last_texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
     glGenTextures(1, &bd->FontTexture);

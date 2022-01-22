@@ -62,7 +62,7 @@ extern "C" {
  *  the library, version management and error handling.  For more task-oriented
  *  information, see the @ref intro_guide.
  */
-/*! @defgroup input Input reference
+/*! @defgroup input input reference
  *
  *  This is the reference documentation for input related functions and types.
  *  For more task-oriented information, see the @ref input_guide.
@@ -550,16 +550,16 @@ extern "C" {
  *
  *  GLFW could not find support for the requested API on the system.
  *
- *  @analysis The installed graphics driver does not support the requested
+ *  @analysis The installed graphic_misc driver does not support the requested
  *  API, or does not support it via the chosen context creation backend.
  *  Below are a few examples.
  *
  *  @par
- *  Some pre-installed Windows graphics drivers do not support OpenGL.  AMD only
+ *  Some pre-installed Windows graphic_misc drivers do not support OpenGL.  AMD only
  *  supports OpenGL ES via EGL, while Nvidia and Intel only support it via
  *  a WGL or GLX extension.  OS X does not provide OpenGL ES at all.  The Mesa
  *  EGL, OpenGL and OpenGL ES libraries do not interface with the Nvidia binary
- *  driver.  Older graphics drivers do not support Vulkan.
+ *  driver.  Older graphic_misc drivers do not support Vulkan.
  */
 #define GLFW_API_UNAVAILABLE        0x00010006
 /*! @brief The requested OpenGL or OpenGL ES version is not available.
@@ -1641,7 +1641,7 @@ GLFWAPI const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* monitor);
  *  GLFW_PLATFORM_ERROR.
  *
  *  @remark Gamma ramp sizes other than 256 are not supported by all platforms
- *  or graphics hardware.
+ *  or graphic_misc hardware.
  *
  *  @remark @win32 The gamma ramp size must be 256.
  *

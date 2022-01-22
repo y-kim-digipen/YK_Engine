@@ -1,6 +1,6 @@
 // dear imgui: Platform Backend for GLFW
 // This needs to be used along with a Renderer (e.g. OpenGL3, Vulkan, WebGPU..)
-// (Info: GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
+// (Info: GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphic_misc context creation, etc.)
 // (Requires: GLFW 3.1+)
 
 // Implemented features:

@@ -1621,7 +1621,7 @@ struct ImGuiContext
     ImVector<ImGuiID>       MenusIdSubmittedThisFrame;          // A list of menu IDs that were rendered at least once
 
     // Platform support
-    ImVec2                  PlatformImePos;                     // Cursor position request & last passed to the OS Input Method Editor
+    ImVec2                  PlatformImePos;                     // Cursor position request & last passed to the OS input Method Editor
     ImVec2                  PlatformImeLastPos;
     char                    PlatformLocaleDecimalPoint;         // '.' or *localeconv()->decimal_point
 
