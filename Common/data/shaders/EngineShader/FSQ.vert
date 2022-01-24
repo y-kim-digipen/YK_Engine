@@ -17,7 +17,7 @@ out VS_OUT
 void main()
 {
     //    vs_out.vertexPosition = vertexTransform *  vec4( vPosition, 1.0f );
-    vs_out.vertexPosition = vertexTransform * vec4( vPosition, 1.0f );
+    vs_out.vertexPosition = /*vertexTransform */ vec4( vPosition, 1.0f );
     vs_out.vertexUV = vUV;
 
 //    vTransform = vertexTransform;

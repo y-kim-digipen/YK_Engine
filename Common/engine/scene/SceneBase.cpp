@@ -24,11 +24,11 @@ void SceneBase::Init() {
     Debug_FSQ = new Object("Quad", "Quad", "FSQShader");
     Debug_FSQ->Init();
 
-    Debug_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
+    Debug_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
     Debug_FSQ->ChangeTexture(1, "");
 
 
-    Result_FSQ = new Object("Quad", "Quad", "ResultShader");
+    Result_FSQ = new Object("Quad", "Quad", "ResultShader2");
     Result_FSQ->Init();
     Result_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
     Result_FSQ->ChangeTexture(1, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
@@ -71,13 +71,15 @@ void SceneBase::Render() const {
                       0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-//    Debug_FSQ->Render();
     for(auto& light : m_pForwardedObjects){
         auto& pLight = light.second;
         if(pLight->IsRenderReady()) {
             pLight->Render();
         }
     }
+    UseFBO(0, engine::GetWindowSize().x * 0.2, engine::GetWindowSize().y * 0.2, false);
+    Debug_FSQ->Render();
+
 }
 
 void SceneBase::PostRender() {

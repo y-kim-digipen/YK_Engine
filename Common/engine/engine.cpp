@@ -31,6 +31,7 @@ End Header --------------------------------------------------------*/
 #include "GUI/EngineInfoContent.h"
 #include "engine/graphic_misc/Environment.h"
 #include "engine/GUI/LightListContent.h"
+#include "engine/GUI/FBODebugContent.h"
 
 static auto CurrentTime = std::chrono::system_clock::now();
 static auto LastTime = CurrentTime;
@@ -103,7 +104,7 @@ void engine::InitEngine() {
     OBJReader objReader;
     mFocusedSceneIdx = -1;
     InputManager::Init();
-    mGUIManager.Init(m_pGUIWindow);
+    mGUIManager.Init(m_pWindow);
 
     SetupFBO();
     SetupShaders();
@@ -132,6 +133,7 @@ void engine::InitEngine() {
 }
 
 void engine::Update() {
+
 //    const static float TargetDeltaTime = 1.f / FPS;
     auto deltaTime = std::chrono::duration_cast<std::chrono::duration<float>>((CurrentTime - LastTime)).count();
     //todo set FPS limit
@@ -150,7 +152,7 @@ void engine::Update() {
     //why it had to be called every frame?
 //    glfwMakeContextCurrent(m_pWindow);
 
-    SwapToMainWindow();
+//    SwapToMainWindow();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -170,15 +172,18 @@ void engine::Update() {
             PostRender();
         }
     }
+    mGUIManager.Update();
     glfwSwapBuffers(m_pWindow);
 
-    SwapToGUIWindow();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    mGUIManager.Update();
-    glfwSwapBuffers(m_pGUIWindow);
-
     glfwPollEvents();
+//
+//    SwapToGUIWindow();
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+
+//    glfwSwapBuffers(m_pGUIWindow);
+
+
 }
 
 void engine::CleanUp() {
@@ -334,6 +339,11 @@ void engine::SetupShaders() {
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
                                                                   {GL_VERTEX_SHADER,"../data/shaders/DeferredPhong.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/DeferredPhong.frag"} });
+
+    pShader = mShaderManager.AddComponent("ResultShader2", new Shader("ResultShader2"), false);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../data/shaders/DeferredPBR.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/DeferredPBR.frag"} });
 }
 
 void engine::SetupMeshes() {
@@ -376,10 +386,10 @@ void engine::SetupMeshes() {
     objReader.ReadOBJFile("../data/models/cup.obj", pMesh.get());
     pMesh->Init();
 
-//    pMesh = mMeshManager.AddComponent("StarWars", std::make_shared<Mesh>("StarWars"));
-//    pMesh->ClearData();
-//    objReader.ReadOBJFile("../data/models/starwars1.obj", pMesh.get());
-//    pMesh->Init();
+    pMesh = mMeshManager.AddComponent("StarWars", std::make_shared<Mesh>("StarWars"));
+    pMesh->ClearData();
+    objReader.ReadOBJFile("../data/models/starwars1.obj", pMesh.get());
+    pMesh->Init();
 
     pMesh = mMeshManager.AddComponent("4Sphere", std::make_shared<Mesh>("4Sphere"));
     pMesh->ClearData();
@@ -433,6 +443,10 @@ void engine::SetupGUI() {
     pGUIWindow = mGUIManager.AddWindow("Global Setting");
     pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
     pGUIWindow->AddContent("engine Info", new EngineInfoContent());
+//
+    pGUIWindow = mGUIManager.AddWindow("DebugFBO");
+//    pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
+    pGUIWindow->AddContent("engine Info", new FBODebugContent());
 }
 
 std::string engine::GetTitleName() {
@@ -491,13 +505,13 @@ void engine::SetupFBO() {
     const glm::vec2 gBufferResolution = GetWindowSize();
     //Init gBuffer
     gBuffer.Init(gBufferResolution.x, gBufferResolution.y);
-    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("viewPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGBA32F);
+    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("viewPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT0, gBufferPosBufferTexture);
-    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("normalBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGBA32F);
+    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("normalBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT1, gBufferNormalBufferTexture);
-    TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("uvBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGBA32F);
+    TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("uvBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT2, gBufferUVBufferTexture);
-    TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("depthBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGBA32F);
+    TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("depthBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT3, gBufferDepthBufferTexture);
     gBuffer.SetDepthAttachment();
     gBuffer.UseDrawBuffers();

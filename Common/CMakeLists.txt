@@ -91,7 +91,7 @@ add_executable( ${TARGET_NAME}
         ../Common/engine/GUI/EngineInfo.h
         ../Common/engine/GUI/ObjectListContent.cpp
         ../Common/engine/GUI/ObjectListContent.h
-        )
+        engine/GUI/FBODebugContent.cpp engine/GUI/FBODebugContent.h)
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )

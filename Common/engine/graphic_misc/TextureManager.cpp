@@ -28,7 +28,7 @@ int TextureManager::CreateTextureFromFile(const std::string &file, const std::st
     }
     TextureObject* t = CreateTexture(textureName, width, height, type, textureUnit, channel == 3 ? GL_RGB32F : GL_RGBA32F);
 
-    glTextureSubImage2D(t->GetHandle(), 0, 0, 0, width, height, channel == 3 ? GL_RGB: GL_RGBA/*GL_RGBA*/, GL_UNSIGNED_BYTE, img);
+    glTextureSubImage2D(t->GetHandle(), 0, 0, 0, width, height, channel == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img);
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -43,7 +43,7 @@ TextureManager::CreateTexture(const std::string &textureName, GLint width, GLint
     glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle);
     glBindTexture(GL_TEXTURE_2D, textureHandle);
 
-    glTextureStorage2D(textureHandle, 6, channel, width, height);
+    glTextureStorage2D(textureHandle, 1, channel, width, height);
 
     GLuint samplerID;
     glCreateSamplers(1, &samplerID);
