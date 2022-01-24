@@ -28,7 +28,7 @@ void SceneBase::Init() {
     Debug_FSQ->ChangeTexture(1, "");
 
 
-    Result_FSQ = new Object("Quad", "Quad", "ResultShader");
+    Result_FSQ = new Object("Quad", "Quad", "ResultShader2");
     Result_FSQ->Init();
     Result_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
     Result_FSQ->ChangeTexture(1, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
@@ -79,7 +79,6 @@ void SceneBase::Render() const {
     }
 
     UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
-
 }
 
 void SceneBase::PostRender() {

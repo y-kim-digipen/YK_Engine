@@ -24,11 +24,7 @@ End Header --------------------------------------------------------*/
 #include "engine/scene/TestScene.h"
 #include "engine/graphic_misc/OBJReader.h"
 
-//GUI things
-#include "GUI/GUIWindow.h"
-#include "GUI/EngineInfoContent.h"
 #include "engine/graphic_misc/Environment.h"
-#include "engine/GUI/TextureContent.h"
 
 static auto CurrentTime = std::chrono::system_clock::now();
 static auto LastTime = CurrentTime;
@@ -111,7 +107,7 @@ void engine::InitEngine() {
     OBJReader objReader;
     mFocusedSceneIdx = -1;
     InputManager::Init();
-    mGUIManager.Init(m_pWindow);
+
 
     SetupFBO();
     SetupShaders();
@@ -120,6 +116,8 @@ void engine::InitEngine() {
     //todo for now, it is for debugging
 
     SetupScenes();
+
+    mGUIManager.Init(m_pWindow);
 
     mFocusedSceneIdx = 0;
     SetClearColor(Color(0.0f));
@@ -426,9 +424,9 @@ SceneBase* engine::GetCurrentScene() {
 }
 
 void engine::SetupGUI() {
-    using namespace GUI;
-    auto pGUI = GetGUIManager().AddWindow("Info");
-    pGUI->AddContent("Hey", new EngineInfoContent);
+//    using namespace GUI;
+//    auto pGUI = GetGUIManager().AddWindow("Info");
+//    pGUI->AddContent("Hey", new EngineInfoContent);
 }
 
 std::string engine::GetTitleName() {

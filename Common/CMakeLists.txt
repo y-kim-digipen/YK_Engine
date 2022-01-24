@@ -74,17 +74,11 @@ add_executable( ${TARGET_NAME}
         ../Common/engine/graphic_misc/FBO.cpp
 
         #GUI
-        ../Common/engine/GUI/EngineInfoContent.cpp
-        ../Common/engine/GUI/EngineInfoContent.h
         ../Common/engine/GUI/GUIManager.h
         ../Common/engine/GUI/GUIManager.cpp
         ../Common/engine/GUI/GUIObject.h
-        ../Common/engine/GUI/GUIWindow.cpp
-        ../Common/engine/GUI/GUIWindow.h
         ../Common/engine/GUI/GUIContent.h
-        ../Common/engine/GUI/EngineInfo.cpp
-        ../Common/engine/GUI/EngineInfo.h
-        engine/GUI/TextureContent.cpp engine/GUI/TextureContent.h)
+        )
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )

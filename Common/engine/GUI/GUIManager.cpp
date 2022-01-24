@@ -16,15 +16,14 @@ End Header --------------------------------------------------------*/
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "GUIWindow.h"
-#include "EngineInfo.h"
 #include "engine/engine.h"
-#include "TextureContent.h"
+
 
 #include "engine/scene/SceneBase.h"
 #include "ColorSet.h"
 
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <random>
 
 namespace GUI {
     void GUI_Manager::Init(GLFWwindow *m_pWindow) {
@@ -45,11 +44,9 @@ namespace GUI {
         ImGui_ImplGlfw_InitForOpenGL(m_pWindow, true);
         ImGui_ImplOpenGL3_Init("#version 410");
 
-        m_pWindows.try_emplace("engine Info Window", new EngineInfo("engine Info Window"));
-
-        InitWindows();
-
-        show_demo_window = true;
+        show_demo_window = false;
+        textureNames.resize(4);
+        textureNames[0] = engine::renderBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0);
     }
 
     void GUI_Manager::Update() {
@@ -59,33 +56,9 @@ namespace GUI {
     }
 
     void GUI_Manager::CleanUp() {
-        for (auto pWindow: m_pWindows) {
-            pWindow.second->CleanUp();
-        }
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-    }
-
-    GUI_Window *GUI_Manager::AddWindow(const std::string &name) {
-        auto result = m_pWindows.try_emplace(name, new GUI_Window(name));
-        if (!result.second) {
-            return nullptr;
-        }
-        InitWindows();
-        return result.first->second;
-    }
-
-    bool GUI_Manager::HasWindow(const std::string &window) {
-        return m_pWindows.find(window) != m_pWindows.end();
-    }
-
-    void GUI_Manager::RemoveWindow(const std::string &windowNameStr) {
-        if (!HasWindow(windowNameStr)) {
-            return;
-        }
-        delete m_pWindows.find(windowNameStr)->second;
-        m_pWindows.erase(windowNameStr);
     }
 
     void GUI_Manager::PreRender() {
@@ -106,16 +79,21 @@ namespace GUI {
             RenderLightList();
         }
 
+        if (show_texture_0) {
+            RenderTextureWindow("Slot0", textureNames[0], &show_texture_0);
+        }
+        if (show_texture_1) {
+            RenderTextureWindow("Slot1", textureNames[1], &show_texture_1);
+        }
+        if (show_texture_2) {
+            RenderTextureWindow("Slot2", textureNames[2], &show_texture_2);
+        }
+        if (show_texture_3) {
+            RenderTextureWindow("Slot3", textureNames[3], &show_texture_3);
+        }
 
-
-        for (auto &pWindow: m_pWindows) {
-            pWindow.second->PreRender();
-            pWindow.second->Render();
-            pWindow.second->PostRender();
-            if(pWindow.second->mIsOpen == false)
-            {
-                deleting_que.push_back(pWindow.first);
-            }
+        if (show_assignment_detail) {
+            RenderAssignmentDetail();
         }
     }
 
@@ -139,17 +117,6 @@ namespace GUI {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
-        }
-        for(auto str : deleting_que)
-        {
-            m_pWindows.erase(str);
-        }
-//        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-
-    void GUI_Manager::InitWindows() {
-        for (auto pWindow: m_pWindows) {
-            pWindow.second->Init();
         }
     }
 
@@ -245,17 +212,25 @@ namespace GUI {
             }
 
             if (ImGui::BeginMenu("Windows")) {
-                if (ImGui::BeginMenu("Show")) {
-                    ImGui::MenuItem("Objects", NULL, &show_object_list);
-                    ImGui::MenuItem("Lights", NULL, &show_light_list);
+                if (ImGui::BeginMenu("List")) {
+                    ImGui::MenuItem("Object", NULL, &show_object_list);
+                    ImGui::MenuItem("Light", NULL, &show_light_list);
                     ImGui::EndMenu();
                 }
-                if (ImGui::MenuItem("AddTextureWindow")) {
-                    auto pWindow = AddWindow("Hello" + std::to_string(m_pWindows.size()));
-                    pWindow->AddContent("TextureContent", new TextureContent);
+                if (ImGui::BeginMenu("Render")) {
+                    ImGui::MenuItem("Slot0", NULL, &show_texture_0);
+                    ImGui::MenuItem("Slot1", NULL, &show_texture_1);
+                    ImGui::MenuItem("Slot2", NULL, &show_texture_2);
+                    ImGui::MenuItem("Slot3", NULL, &show_texture_3);
+//                    auto pWindow = AddWindow("Hello" + std::to_string(m_pWindows.size()));
+//                    pWindow->AddContent("TextureContent", new TextureContent);
 
+                    ImGui::EndMenu();
                 }
-
+                if (ImGui::BeginMenu("others")) {
+                    ImGui::MenuItem("Assignment Detail", NULL, &show_assignment_detail);
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenu();
             }
 
@@ -490,6 +465,247 @@ namespace GUI {
                 ImGui::PopID();
             }
         }
+        ImGui::End();
+    }
+
+    void GUI_Manager::RenderTextureWindow(const std::string &slotName, std::string &textureName, bool *isOpen) {
+        ImGui::Begin(slotName.c_str(), isOpen);
+
+        auto &TextureComponents = engine::GetTextureManager().GetTextureObjects();
+        if (ImGui::BeginCombo("Texture", textureName.c_str())) {
+            for (auto &texture: TextureComponents) {
+                const std::string textureStr = texture.first;
+                bool isSelected = (textureName == textureStr);
+                if (ImGui::Selectable(textureStr.c_str(), isSelected)) {
+                    textureName = textureStr;
+
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        // Using a Child allow to fill all the space of the window.
+        // It also alows customization
+        // Get the size of the child (i.e. the whole draw size of the windows).
+        ImVec2 wsize = ImGui::GetWindowSize();
+        // Because I use the texture from OpenGL, I need to invert the V from the UV.
+        auto pTextureObj = engine::GetTextureManager().FindTextureByName(textureName);
+        if (pTextureObj) {
+            auto handle = (void *) pTextureObj->GetHandle();
+            ImGui::Image(handle, wsize, ImVec2(0, 1), ImVec2(1, 0));
+        }
+
+        ImGui::End();
+    }
+
+    void GUI_Manager::RenderAssignmentDetail() {
+        ImGui::Begin("Assignment Detail", &show_assignment_detail);
+
+        static bool DoRearrangeOrbit = true;
+        DoRearrangeOrbit = false;
+        static bool firstStart = true;
+        static bool firstStartDoRandLightCol = false;
+        static bool firstStartDoRandomLightType = false;
+
+        using std::placeholders::_1;
+        static int numOrbitLights = 8;
+//        numOrbitLights = engine::GetCurrentScene()->GetNumActiveLights();
+        constexpr float orbitRadius = 1.5f;
+        constexpr float orbitalMoveSphereRadius = 0.2f;
+
+        static float firstOrbitLightRadian = 0.f;
+
+        static auto OrbitsMoveUpdate = [&, currentRadian = 0.f](int i, Object *obj) mutable {
+            //axis y is fixed
+            if (DoRearrangeOrbit) {
+                obj->SetScale(glm::vec3(orbitalMoveSphereRadius));
+                currentRadian = firstOrbitLightRadian + PI * 2.f / (numOrbitLights) * i;
+            }
+            auto pCentralObject = engine::GetCurrentScene()->GetObjectList().find("CentralObject")->second;
+            glm::vec3 center = pCentralObject->GetPosition();
+            glm::vec2 fixedYCenter = glm::vec2(center.x, center.z);
+            fixedYCenter += orbitRadius * glm::vec2(std::cos(currentRadian), std::sin(currentRadian));
+            obj->SetPosition(glm::vec3(fixedYCenter.x, center.y + 1.f, fixedYCenter.y));
+            obj->SetRotation(glm::vec3(cos(-currentRadian), 0.f, sin(-currentRadian)));
+            static_cast<Light *>(obj)->std140_structure.dir =
+                    obj->GetPosition() + glm::vec3(0.f, 0.5f, 0.f) - pCentralObject->GetPosition();
+            currentRadian += 0.003f;
+            firstOrbitLightRadian += numOrbitLights == 0 ? 0.f : 0.003f / numOrbitLights;
+        };
+
+        if (firstStart) {
+            for (int i = 0; i < numOrbitLights; ++i) {
+                std::random_device randomDevice;
+                std::uniform_int_distribution<int> randomDistribution(0, 255);
+                std::uniform_int_distribution<int> randomDistribution2(0, 100);
+                const std::string &objName = "OrbitObject" + std::to_string(i);
+                auto pLight = engine::GetCurrentScene()->AddLight(objName, "Sphere", "DiffuseShader");
+                pLight->BindFunction(std::bind(OrbitsMoveUpdate, i, _1));
+                glm::vec3 randomColor = glm::vec3(randomDistribution(randomDevice) / 255.f,
+                                                  randomDistribution(randomDevice) / 255.f,
+                                                  randomDistribution(randomDevice) / 255.f);
+//           engine::GetShader(pLight->GetUsingShaderName())->GetUniformValue<glm::vec3>(pLight->GetName(), "diffuseColor")
+//                   = randomColor;
+                if (firstStartDoRandLightCol == false) {
+                    randomColor = Color(0.8f).AsVec3();
+                }
+                pLight->SetColor(Color(randomColor.x, randomColor.y, randomColor.z));
+                pLight->std140_structure.Ia = randomColor * 128.f;
+                pLight->std140_structure.Id = randomColor * 180.f;
+                pLight->std140_structure.Is = randomColor * 230.f;
+
+                Light::LightType type = Light::LightType::SPOT_LIGHT;
+                if (firstStartDoRandomLightType) {
+                    if (randomDistribution2(randomDevice) < 50) {
+                        type = Light::POINT_LIGHT;
+                    }
+                }
+
+                pLight->std140_structure.type = type;
+                if (type == Light::LightType::POINT_LIGHT) {
+                    pLight->std140_structure.Ks = 0.2f;
+                }
+
+                if (pLight->std140_structure.type == Light::LightType::SPOT_LIGHT) {
+                    pLight->SetMesh("Cube");
+                }
+
+            }
+            firstStart = false;
+            DoRearrangeOrbit = true;
+        }
+
+        if (ImGui::BeginTabBar("##TabBar")) {
+            if (ImGui::BeginTabItem("Default")) {
+                static std::vector<std::string> Scenarios{"Scenario1", "Scenario2", "Scenario3"};
+                static std::string currentScenario = Scenarios.front();
+                ImGui::ColorEdit3("GlobalAmbient", &engine::GlobalAmbientColor.x);
+                ImGui::ColorEdit3("FogColor", &engine::FogColor.x);
+
+                ImGui::Text("%s",
+                            (std::to_string(engine::GetCurrentScene()->GetNumActiveLights()) + " Lights").c_str());
+                ImGui::SameLine();
+                if (ImGui::Button("AddLight")) {
+                    const int i = engine::GetCurrentScene()->GetNumActiveLights();
+                    if (i < ENGINE_SUPPORT_MAX_LIGHTS) {
+                        numOrbitLights = i + 1;
+                        std::random_device randomDevice;
+                        std::uniform_int_distribution<int> randomDistribution(0, 255);
+                        std::uniform_int_distribution<int> randomDistribution2(0, 100);
+                        const std::string &objName = "OrbitObject" + std::to_string(i);
+                        auto pLight = engine::GetCurrentScene()->AddLight(objName, "Sphere", "DiffuseShader");
+                        pLight->BindFunction(std::bind(OrbitsMoveUpdate, i, _1));
+                        glm::vec3 randomColor = glm::vec3(randomDistribution(randomDevice) / 255.f,
+                                                          randomDistribution(randomDevice) / 255.f,
+                                                          randomDistribution(randomDevice) / 255.f);
+                        if (firstStartDoRandLightCol == false) {
+                            randomColor = Color(0.8f).AsVec3();
+                        }
+                        pLight->SetColor(Color(randomColor.x, randomColor.y, randomColor.z));
+                        pLight->std140_structure.Ia = randomColor * 128.f;
+                        pLight->std140_structure.Id = randomColor * 180.f;
+                        pLight->std140_structure.Is = randomColor * 230.f;
+
+                        Light::LightType type = Light::LightType::SPOT_LIGHT;
+                        if (firstStartDoRandomLightType) {
+                            if (randomDistribution2(randomDevice) < 50) {
+                                type = Light::POINT_LIGHT;
+                            }
+                        }
+
+                        pLight->std140_structure.type = type;
+                        if (type == Light::LightType::POINT_LIGHT) {
+                            pLight->std140_structure.Ks = 0.2f;
+                        }
+                        if (pLight->std140_structure.type == Light::LightType::SPOT_LIGHT) {
+                            pLight->SetMesh("Cube");
+                        }
+
+
+                        DoRearrangeOrbit = true;
+                    }
+
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("RemoveLight")) {
+                    const int i = engine::GetCurrentScene()->GetNumActiveLights() - 1;
+                    if (i > 0) {
+                        engine::GetCurrentScene()->RemoveLight("OrbitObject" + std::to_string(i));
+                        numOrbitLights = i;
+                        DoRearrangeOrbit = true;
+                        if (i == 0) {
+                            firstOrbitLightRadian = 0.f;
+                        }
+                    }
+                }
+
+                if (ImGui::BeginCombo("Scenario", currentScenario.c_str())) {
+                    for (const auto &Scenario: Scenarios) {
+                        bool isSelected = (currentScenario == Scenario);
+                        if (ImGui::Selectable(Scenario.c_str(), isSelected)) {
+                            currentScenario = Scenario;
+                            engine::GetCurrentScene()->ClearLights();
+                            firstStart = true;
+                            numOrbitLights = 8;
+                            if (Scenario == Scenarios[0]) {
+                                firstStartDoRandLightCol = false;
+                                firstStartDoRandomLightType = false;
+                            } else if (Scenario == Scenarios[1]) {
+                                firstStartDoRandLightCol = true;
+                                firstStartDoRandomLightType = false;
+                            } else if (Scenario == Scenarios[2]) {
+                                firstStartDoRandLightCol = true;
+                                firstStartDoRandomLightType = true;
+                            }
+                        }
+                        if (isSelected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                static bool update = true;
+                if (ImGui::Checkbox("UpdateOrbitMove", &update)) {
+                    auto &lights = engine::GetCurrentScene()->GetLightList();
+                    for (auto &light: lights) {
+                        if (light.first.find("OrbitObject") <= light.first.length()) {
+                            light.second->SetFunctionUpdate(update);
+                        }
+                    }
+                }
+
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Shader")) {
+                const auto &shaderNameList = engine::GetShaderManager().GetNameList();
+                for (auto &shaderName: shaderNameList) {
+                    ImGui::PushID(shaderName.c_str());
+                    Color textColor(1.f);
+                    auto shaderObject = engine::GetShader(shaderName);
+                    if (shaderObject->HasError()) {
+                        textColor = Color(1.f, 0.f, 0.f);
+                    }
+                    ImVec4 color(textColor.r, textColor.g, textColor.b, textColor.a);
+                    ImGui::TextColored(color, "%s", shaderObject->GetName().c_str());
+                    ImGui::SameLine();
+                    if (ImGui::Button("Reload")) {
+
+                        shaderObject->Reload();
+                        DoRearrangeOrbit = true;
+                    }
+                    ImGui::PopID();
+                }
+                ImGui::EndTabItem();
+            }
+
+
+            ImGui::EndTabBar();
+        }
+
         ImGui::End();
     }
 }

@@ -42,15 +42,9 @@ End Header --------------------------------------------------------*/
 class SceneBase;
 class GLFWwindow;
 
-namespace GUI
-{
-    class EngineInfoContent;
-}
-
 class engine
 {
     friend GUI::GUI_Manager;
-    friend GUI::EngineInfoContent;
 public:
     engine();
 

@@ -23,11 +23,8 @@ namespace GUI{
         void Update();
         void CleanUp();
 
-        GUI_Window* AddWindow(const std::string& name);
-        bool HasWindow(const std::string& windowNameStr);
-        void RemoveWindow(const std::string& windowNameStr);
     private:
-        void InitWindows();
+
         void PreRender();
         void Render();
         void PostRender();
@@ -35,19 +32,26 @@ namespace GUI{
     private:
         void RenderDockingWindow();
 
-        bool show_demo_window = false;
-        std::map<std::string, GUI_Window*> m_pWindows;
         GLFWwindow* p_glfwWindow;
-
+        bool show_demo_window = false;
         bool show_object_list = false;
         bool show_light_list = false;
+
+        bool show_texture_0 = true;
+        bool show_texture_1 = false;
+        bool show_texture_2 = false;
+        bool show_texture_3 = false;
+
+        bool show_assignment_detail = true;
+
+        std::vector<std::string> textureNames;
 
         std::vector<std::string> deleting_que;
     private:
         void RenderObjectList();
         void RenderLightList();
-
-
+        void RenderTextureWindow(const std::string& slotName, std::string& textureName, bool* isOpen);
+        void RenderAssignmentDetail();
     };
 }
 #endif //ENGINE_GUIMANAGER_H
