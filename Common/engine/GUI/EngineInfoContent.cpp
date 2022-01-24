@@ -59,7 +59,7 @@ namespace GUI
                 std::uniform_int_distribution<int> randomDistribution(0, 255);
                 std::uniform_int_distribution<int> randomDistribution2(0, 100);
                 const std::string &objName = "OrbitObject" + std::to_string(i);
-                auto pLight = engine::GetCurrentScene()->AddLight(objName, "Sphere", "TestShader");
+                auto pLight = engine::GetCurrentScene()->AddLight(objName, "Sphere", "DiffuseShader");
                 pLight->BindFunction(std::bind(OrbitsMoveUpdate, i, _1));
                 glm::vec3 randomColor = glm::vec3(randomDistribution(randomDevice) / 255.f,
                                                   randomDistribution(randomDevice) / 255.f,
@@ -84,6 +84,11 @@ namespace GUI
                 pLight->std140_structure.type = type;
                 if (type == Light::LightType::POINT_LIGHT) {
                     pLight->std140_structure.Ks = 0.2f;
+                }
+
+                if(pLight->std140_structure.type == Light::LightType::SPOT_LIGHT)
+                {
+                    pLight->SetMesh("Cube");
                 }
 
             }
@@ -121,7 +126,6 @@ namespace GUI
                         pLight->std140_structure.Id = randomColor * 180.f;
                         pLight->std140_structure.Is = randomColor * 230.f;
 
-//                if(fir)
                         Light::LightType type = Light::LightType::SPOT_LIGHT;
                         if (firstStartDoRandomLightType) {
                             if (randomDistribution2(randomDevice) < 50) {
@@ -133,6 +137,11 @@ namespace GUI
                         if (type == Light::LightType::POINT_LIGHT) {
                             pLight->std140_structure.Ks = 0.2f;
                         }
+                        if(pLight->std140_structure.type == Light::LightType::SPOT_LIGHT)
+                        {
+                            pLight->SetMesh("Cube");
+                        }
+
 
                         DoRearrangeOrbit = true;
                     }
@@ -206,9 +215,9 @@ namespace GUI
                     ImGui::TextColored(color, "%s", shaderObject->GetName().c_str());
                     ImGui::SameLine();
                     if(ImGui::Button("Reload")) {
-                        engine::SwapToMainWindow();
+
                         shaderObject->Reload();
-                        engine::SwapToGUIWindow();
+
 //                        firstStart = true;
                         DoRearrangeOrbit = true;
                     }

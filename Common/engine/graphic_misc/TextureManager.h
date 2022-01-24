@@ -26,6 +26,8 @@ public:
     void BindTexture(TextureObject* pTexture);
     void BindTextureTo(TextureObject* pTexture, GLuint location);
     TextureObject* CreateTexture(const std::string& textureName, GLint width, GLint height, GLenum textureType, GLint textureUnit, GLenum channel);
+
+    std::map<std::string, TextureObject*>& GetTextureObjects();
 private:
 
     void SetSamplerClampingProperties(GLuint samplerID, GLenum clampProp, GLenum mipmapProp);

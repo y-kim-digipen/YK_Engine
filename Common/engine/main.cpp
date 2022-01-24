@@ -14,7 +14,8 @@ End Header --------------------------------------------------------*/
 
 int main(){
 
-    engine::InitWindow(glm::vec2{1600, 900}, "Assignment 2");
+    engine::InitWindow(glm::vec2{1920, 1080}, "S22_Assignment1"
+                                              "");
     engine::InitEngine();
 
     do{

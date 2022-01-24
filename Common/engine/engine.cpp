@@ -26,12 +26,9 @@ End Header --------------------------------------------------------*/
 
 //GUI things
 #include "GUI/GUIWindow.h"
-#include "GUI/CurrentCameraInfoContent.h"
-#include "GUI/ObjectListContent.h"
 #include "GUI/EngineInfoContent.h"
 #include "engine/graphic_misc/Environment.h"
-#include "engine/GUI/LightListContent.h"
-#include "engine/GUI/FBODebugContent.h"
+#include "engine/GUI/TextureContent.h"
 
 static auto CurrentTime = std::chrono::system_clock::now();
 static auto LastTime = CurrentTime;
@@ -66,8 +63,17 @@ int engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
 
     glfwInit();
 
-    m_pWindow = glfwCreateWindow(static_cast<int>(mWinSize.x), static_cast<int>(mWinSize.y), mTitleStr.c_str(), nullptr, nullptr);
-    m_pGUIWindow = glfwCreateWindow(static_cast<int>(mWinSize.x * 0.5f), static_cast<int>(mWinSize.y), "GUIWindow", nullptr, nullptr);
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+//    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+//    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+//    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+//    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    m_pWindow = glfwCreateWindow(mode->width, mode->height, mTitleStr.c_str(), NULL, NULL);
+
+
+//    m_pWindow = glfwCreateWindow(static_cast<int>(mWinSize.x), static_cast<int>(mWinSize.y), mTitleStr.c_str(), glfwGetPrimaryMonitor(), nullptr);
     if(m_pWindow == nullptr) {
         std::cerr << "Failed to open GLFW window. Check if your GPU is compatible." << std::endl;
         glfwTerminate();
@@ -92,6 +98,7 @@ int engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
     }
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
+
     return 0;
 }
 
@@ -150,9 +157,6 @@ void engine::Update() {
 
     InputManager::Update();
     //why it had to be called every frame?
-//    glfwMakeContextCurrent(m_pWindow);
-
-//    SwapToMainWindow();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -176,14 +180,6 @@ void engine::Update() {
     glfwSwapBuffers(m_pWindow);
 
     glfwPollEvents();
-//
-//    SwapToGUIWindow();
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-
-//    glfwSwapBuffers(m_pGUIWindow);
-
-
 }
 
 void engine::CleanUp() {
@@ -297,15 +293,16 @@ void engine::SetupShaders() {
                                                                   {GL_VERTEX_SHADER,"../data/shaders/QuadVertexShader.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/QuadFragmentShader.frag"} });
 
+    pShader = mShaderManager.AddComponent("DiffuseShader", new Shader("DiffuseShader"));
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER  ,"../data/shaders/EngineShader/DiffuseShader.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/EngineShader/DiffuseShader.frag"} });
+
+
     pShader = mShaderManager.AddComponent("3D_DefaultShader", new Shader("3D_DefaultShader"));
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
                                                                   {GL_VERTEX_SHADER,"../data/shaders/SimpleVertexShader.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/SimpleFragmentShader.frag"} });
-
-    pShader = mShaderManager.AddComponent("DiffuseShader", new Shader("DiffuseShader"));
-    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
-                                                                  {GL_VERTEX_SHADER,"../data/shaders/DiffuseShader.vert"},
-                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/DiffuseShader.frag"} });
 
     pShader = mShaderManager.AddComponent("NormalDrawShader", new Shader("NormalDrawShader"), false);
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
@@ -430,23 +427,8 @@ SceneBase* engine::GetCurrentScene() {
 
 void engine::SetupGUI() {
     using namespace GUI;
-//    auto pGUIWindow = mGUIManager.AddWindow("Camera Settings");
-//    pGUIWindow->AddContent("Position", new CurrentCameraInfoContent());
-    auto pGUIWindow = mGUIManager.AddWindow("Object Lists");
-    pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
-    pGUIWindow->AddContent("Object Lists", new ObjectListContent());
-
-    pGUIWindow = mGUIManager.AddWindow("Light Lists");
-    pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
-    pGUIWindow->AddContent("Light Lists", new LightListContent());
-
-    pGUIWindow = mGUIManager.AddWindow("Global Setting");
-    pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
-    pGUIWindow->AddContent("engine Info", new EngineInfoContent());
-//
-    pGUIWindow = mGUIManager.AddWindow("DebugFBO");
-//    pGUIWindow->AddFlag(ImGuiWindowFlags_AlwaysAutoResize);
-    pGUIWindow->AddContent("engine Info", new FBODebugContent());
+    auto pGUI = GetGUIManager().AddWindow("Info");
+    pGUI->AddContent("Hey", new EngineInfoContent);
 }
 
 std::string engine::GetTitleName() {
@@ -486,21 +468,6 @@ void engine::SkipFrame(int Frames) {
     leftSkipFrames += Frames + 1;
 }
 
-void engine::SwapToMainWindow() {
-    glfwMakeContextCurrent(m_pWindow);
-//    glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
-//    glCullFace(GL_BACK);
-//
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-}
-
-void engine::SwapToGUIWindow() {
-    glfwMakeContextCurrent(m_pGUIWindow);
-
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-}
-
 void engine::SetupFBO() {
     const glm::vec2 gBufferResolution = GetWindowSize();
     //Init gBuffer
@@ -524,6 +491,27 @@ void engine::SetupFBO() {
     {
         std::cout << "[FBO Init] Frame Buffer Success" << std::endl;
     }
+
+    const glm::vec2 renderBufferResolution = gBufferResolution;
+    renderBuffer.Init(renderBufferResolution.x, renderBufferResolution.y);
+
+    TextureObject* finalRenderBufferTexture = GetTextureManager().CreateTexture("FinalRenderBufferTexture", renderBufferResolution.x, renderBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGB32F);
+    renderBuffer.SetAttachment(GL_COLOR_ATTACHMENT0, finalRenderBufferTexture);
+    renderBuffer.SetDepthAttachment();
+    renderBuffer.UseDrawBuffers();
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cerr << "[FBO Error] Frame Buffer Incomplete" << std::endl;
+    }
+    else
+    {
+        std::cout << "[FBO Init] Frame Buffer Success" << std::endl;
+    }
+}
+
+void engine::ShutDown() {
+    glfwSetWindowShouldClose(m_pWindow, true);
 }
 
 

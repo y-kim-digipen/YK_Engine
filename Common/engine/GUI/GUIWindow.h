@@ -29,11 +29,12 @@ namespace GUI{
         void AddFlag(ImGuiWindowFlags flag);
 
         void SetCanClose(bool canClose);
+
+        void SetTitle(const std::string& nameStr);
     protected:
         bool IsFocused() const;
-        void PreRender() override;
         void Render() override;
-        void PostRender() override;
+
     protected:
         explicit GUI_Window(const std::string &titleName);
         std::string mTitleName;

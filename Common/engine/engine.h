@@ -49,6 +49,7 @@ namespace GUI
 
 class engine
 {
+    friend GUI::GUI_Manager;
     friend GUI::EngineInfoContent;
 public:
     engine();
@@ -61,6 +62,8 @@ public:
     static void InitEngine();
     static void Update();
     static void CleanUp();
+
+    static void ShutDown();
 
     static void SetClearColor(Color newClearColor);
 
@@ -101,13 +104,9 @@ private:
     static void KeyboardInputCallback(GLFWwindow*, int key, [[maybe_unused]] int keyCode, int action, [[maybe_unused]] int modifier);
     //static void MouseButtonCallback(GLFWwindow*, int button, int action, [[maybe_unused]] int modifier);
     //static void MouseScrollCallback(GLFWwindow*, double, double yOffset)
-    static void SwapToMainWindow();
-    static void SwapToGUIWindow();
-
 private:
     inline static std::string mTitleStr;
     inline static GLFWwindow* m_pWindow;
-    inline static GLFWwindow* m_pGUIWindow;
     inline static glm::vec2 mWinSize;
     inline static Color mClearColor;
 
@@ -137,4 +136,5 @@ private:
 
 public:
     inline static FBO gBuffer;
+    inline static FBO renderBuffer;
 };

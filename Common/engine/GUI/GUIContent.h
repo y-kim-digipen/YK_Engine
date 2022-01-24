@@ -13,6 +13,8 @@ End Header --------------------------------------------------------*/
 #ifndef ENGINE_GUICONTENT_H
 #define ENGINE_GUICONTENT_H
 #include "GUIObject.h"
+#include "GUIWindow.h"
+
 namespace GUI {
     class GUI_Content {
     public:
@@ -24,6 +26,15 @@ namespace GUI {
 
         virtual bool IsDead() { return false; }
         virtual bool DoDestroyBaseWindow() { return false; }
+
+        void SetParent(GUI_Window* pParent)
+        {
+            m_pParent = pParent;
+        };
+
+    protected:
+        GUI_Window* m_pParent;
     };
+
 }
 #endif //ENGINE_GUICONTENT_H

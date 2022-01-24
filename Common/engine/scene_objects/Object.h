@@ -23,12 +23,12 @@ End Header --------------------------------------------------------*/
 #include "engine/graphic_misc/Color.h"
 
 namespace GUI{
-    class ObjectDetailContent;
+    class GUI_Manager;
 }
 //class CubeCaptureCamera;
 
 class Object{
-    friend class GUI::ObjectDetailContent;
+    friend class GUI::GUI_Manager;
 public:
     Object(const std::string& name);
     Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader);

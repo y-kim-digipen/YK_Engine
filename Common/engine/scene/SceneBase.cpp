@@ -28,7 +28,7 @@ void SceneBase::Init() {
     Debug_FSQ->ChangeTexture(1, "");
 
 
-    Result_FSQ = new Object("Quad", "Quad", "ResultShader2");
+    Result_FSQ = new Object("Quad", "Quad", "ResultShader");
     Result_FSQ->Init();
     Result_FSQ->ChangeTexture(0, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
     Result_FSQ->ChangeTexture(1, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
@@ -61,11 +61,11 @@ void SceneBase::Render() const {
         }
     }
 
-    UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
+    UseFBO(engine::renderBuffer.GetFBOHandle(), engine::GetWindowSize().x, engine::GetWindowSize().y, true);
     Result_FSQ->Render();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.GetFBOHandle());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, engine::renderBuffer.GetFBOHandle());
 
     glBlitFramebuffer(0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
                       0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
@@ -77,8 +77,8 @@ void SceneBase::Render() const {
             pLight->Render();
         }
     }
-    UseFBO(0, engine::GetWindowSize().x * 0.2, engine::GetWindowSize().y * 0.2, false);
-    Debug_FSQ->Render();
+
+    UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
 
 }
 

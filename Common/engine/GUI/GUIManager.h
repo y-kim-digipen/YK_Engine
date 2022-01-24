@@ -13,6 +13,7 @@ End Header --------------------------------------------------------*/
 #ifndef ENGINE_GUIMANAGER_H
 #define ENGINE_GUIMANAGER_H
 #include <map>
+#include <vector>
 class GLFWwindow;
 namespace GUI{
     class GUI_Window;
@@ -32,8 +33,20 @@ namespace GUI{
         void PostRender();
 
     private:
+        void RenderDockingWindow();
+
         bool show_demo_window = false;
         std::map<std::string, GUI_Window*> m_pWindows;
+        GLFWwindow* p_glfwWindow;
+
+        bool show_object_list = false;
+        bool show_light_list = false;
+
+        std::vector<std::string> deleting_que;
+    private:
+        void RenderObjectList();
+        void RenderLightList();
+
 
     };
 }

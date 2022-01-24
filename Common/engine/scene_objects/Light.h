@@ -22,7 +22,7 @@ class Light : public Object{
     friend class GUI::LightDetailContent;
     friend class LightManager;
 public:
-    Light(const std::string& lightName) : Object(lightName, "Bulb", "TestShader") {
+    Light(const std::string& lightName) : Object(lightName, "Bulb", "DiffuseShader") {
         SetPosition(glm::vec3(1.f, 1.f, 0.f));
     }
 

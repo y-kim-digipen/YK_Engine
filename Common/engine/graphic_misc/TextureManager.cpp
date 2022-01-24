@@ -93,3 +93,7 @@ void TextureManager::BindTextureTo(TextureObject* pTexture, GLuint location) {
     glActiveTexture(GL_TEXTURE0 + location);
     glBindTexture(pTexture->GetTextureType(), pTexture->GetHandle());
 }
+
+std::map<std::string, TextureObject *>& TextureManager::GetTextureObjects() {
+    return mTextureObjects;
+}

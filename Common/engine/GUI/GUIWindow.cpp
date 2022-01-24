@@ -20,41 +20,21 @@ namespace GUI {
         mTitleName = titleName;
         mWindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_None;
         mIsOpen = true;
+        mCanClose = true;
     }
 
     std::string GUI_Window::GetTitleName() const {
         return mTitleName;
     }
 
-    void GUI_Window::PreRender() {
-        GUI_Object::PreRender();
-        ImGui::SetNextWindowSize(ImVec2(200, 0), ImGuiCond_Once);
-        mIsOpen = ImGui::Begin(mTitleName.c_str(), mCanClose ? &mIsOpen : NULL, mWindowFlags);
-
-        //todo add this feature later(only focused menu alpha val is high)
-//    if(mIsOpen){
-//        if(IsFocused()){
-//            ImGui::SetNextWindowBgAlpha(0.3f);
-//        }
-//        else{
-//            ImGui::SetNextWindowBgAlpha(0.7f);
-//        }
-//    }
-    }
-
     void GUI_Window::Render() {
+        ImGui::Begin(mTitleName.c_str(), &mIsOpen, mWindowFlags);
+        GUI_Object::PreRender();
         for(auto pContent : m_pContents){
             pContent.second->Render();
         }
-    }
-
-    void GUI_Window::PostRender() {
-        if (mIsOpen) {
-            ImGui::End();
-            return;
-        }
-        ImGui::End();
         GUI_Object::PostRender();
+        ImGui::End();
     }
 
     bool GUI_Window::IsFocused() const {
@@ -62,6 +42,7 @@ namespace GUI {
     }
 
     bool GUI_Window::AddContent(const std::string &name, GUI_Content *content) {
+        content->SetParent(this);
         return m_pContents.try_emplace(name, content).second;
     }
 
@@ -78,5 +59,9 @@ namespace GUI {
 
     void GUI_Window::SetCanClose(bool canClose) {
         mCanClose = canClose;
+    }
+
+    void GUI_Window::SetTitle(const std::string &nameStr) {
+        mTitleName = nameStr;
     }
 }

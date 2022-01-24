@@ -27,7 +27,7 @@ vec2 CalcGPU_UV(int type, vec3 vPositon, vec3 vNormal);
 void main() {
     gl_Position = perspectiveMatrix * modelToWorldTransform * vec4(vPosition, 1.f);
     vec3 Position = (modelToWorldTransform * vec4(vPosition, 1.f)).xyz;
-    vec3 Normal = mat3(modelToWorldTransform) *  vertexNormal;
+    vec3 Normal = normalize(mat3(modelToWorldTransform) *  vertexNormal);
 
     vs_out.fragPos = Position;
     vs_out.fragNormal = Normal;
