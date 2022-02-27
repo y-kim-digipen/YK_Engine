@@ -1,14 +1,14 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: Object.h
 Purpose: Header file for Object
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 
 #ifndef ENGINE_OBJECT_H
@@ -21,7 +21,9 @@ End Header --------------------------------------------------------*/
 #include "engine/graphic_misc/Shader.h"
 #include "engine/graphic_misc/Mesh.h"
 #include "engine/graphic_misc/Color.h"
+#include "engine/graphic_misc/BoundingVolume/ColliderTypes.h"
 
+class Collider;
 namespace GUI{
     class GUI_Manager;
 }
@@ -33,6 +35,9 @@ public:
     Object(const std::string& name);
     Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader);
     Object(const std::string& name, const std::string& meshStr, const std::string& shaderStr);
+
+    bool DoColliding(Object* other);
+
     virtual ~Object();
     void Init();
     virtual void PreRender();
@@ -72,14 +77,19 @@ public:
     glm::mat4 GetObjectToWorldMatrix() const;
     std::string GetName() const;
     void ChangeTexture(int slot, const std::string& textureName);
+
+    virtual void TryCalculateMatrix();
+    Collider* GetBoundingVolume();
+    void SetBoundingVolume(ColliderTypes type);
 private:
     void RenderVertexNormal() const;
     void RenderFaceNormal() const;
 
     void SendMeshDataToShader();
 
+    void SendMaterialDataToShader() const;
+
 protected:
-    virtual void TryCalculateMatrix();
     virtual void RenderModel() const;
 
 protected:
@@ -96,8 +106,6 @@ protected:
     glm::vec3 m_scale;
     glm::vec3 m_rotation;
 
-    Color mEmissiveColor;
-
     std::function<void(void)> mAdditionalFunction;
     bool mUpdateAdditionalFunction;
 
@@ -110,6 +118,13 @@ protected:
     Mesh::UVType mUVType;
 
     std::vector<std::string> mTextureSlots;
+
+    Collider* mAABB = nullptr;
+
+public:
+    Color baseColor;
+    float metallic = 0.f;
+    float roughness = 0.5f;
 };
 
 #endif //ENGINE_OBJECT_H

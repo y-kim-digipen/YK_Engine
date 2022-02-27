@@ -1,7 +1,15 @@
-//
-// Created by yoonki on 9/11/21.
-//
-
+/* Start Header -------------------------------------------------------
+Copyright (C) 2022 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the prior written
+consent of DigiPen Institute of Technology is prohibited.
+File Name: KeyCodes.h
+Purpose: Definition of Keycodes
+Language: C++, g++
+Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
+Project: y.kim_CS350_1
+Author: Yoonki Kim, y.kim,  180002421
+Creation date: Feb 6, 2022
+End Header --------------------------------------------------------*/
 #ifndef ENGINE_KEYCODES_H
 #define ENGINE_KEYCODES_H
 #include <GLFW/glfw3.h>

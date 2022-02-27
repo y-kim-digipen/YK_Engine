@@ -1,14 +1,14 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: Object.cpp
 Purpose: Source file for Object
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 #include "Object.h"
 
@@ -20,19 +20,17 @@ End Header --------------------------------------------------------*/
 #include "engine/graphic_misc/Shader.h"
 #include "engine/scene/SceneBase.h"
 #include "Camera.h"
-//#include "CubeCaptureCamera.h"
+#include "engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h"
 
-Object::Object(const std::string& name) : Object(name, std::shared_ptr<Mesh>(), std::shared_ptr<Shader>()){
-
-}
+Object::Object(const std::string& name) : Object(name, std::shared_ptr<Mesh>(), std::shared_ptr<Shader>()) {}
 
 Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader)
-        : m_pMesh(pMesh), m_pShader(pShader), mObjectName(name), m_MatrixCacheDirty(true),mToWorldMatrix(1.f),
-          m_position(), m_scale(1.f), m_rotation(0.f), mEmissiveColor(Color(0.f)),  mUVType(Mesh::PLANAR_UV) {
+        : m_pMesh(pMesh), m_pShader(pShader), mObjectName(name), m_MatrixCacheDirty(true), mToWorldMatrix(1.f),
+          m_position(), m_scale(1.f), m_rotation(0.f), baseColor(Color(0.f)), mUVType(Mesh::PLANAR_UV) {
     if(m_pShader){
         m_pShader->SetShaderBuffer(mObjectName);
     }
-    SetColor(mEmissiveColor);
+    SetColor(baseColor);
     mDoVertexNormalDrawing = false;
     mDoFaceNormalDrawing = false;
     mUsingTexture = true;
@@ -44,6 +42,8 @@ Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared
 //    mTextureSlots[0] = "tex_object0";
 //    mTextureSlots[1] = "tex_object1";
 
+//    mAABB = new AABB();
+//    static_cast<AABB*>(mAABB)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
 }
 
 Object::Object(const std::string& name, const std::string &meshStr, const std::string &shaderStr)
@@ -53,19 +53,16 @@ Object::Object(const std::string& name, const std::string &meshStr, const std::s
 }
 
 Object::~Object() {
-    std::cout << "[Deleting Object] " << mObjectName << std::endl;
+    if(mAABB != nullptr)
+    {
+        delete mAABB;
+    }
+    std::cout << "[Object deleted] " << mObjectName << std::endl;
 }
 
 
 void Object::Init() {
-    //todo change this after mesh and shader implementation is completed
-    if(m_pMesh != nullptr){
-//        m_pMesh->SetupBuffer();
-    }
-    if(m_pShader != nullptr){
-        //todo implement this when shader's init is implemented
-        //m_pShader->Reload();
-    }
+    assert(m_pMesh != nullptr && m_pShader != nullptr);
 }
 
 void Object::PreRender() {
@@ -127,7 +124,7 @@ void Object::RenderModel() const {
     glUseProgram(shaderPID);
     GLint vTransformLoc = glGetUniformLocation(shaderPID, "vertexTransform");
     GLint vNormalTransformLoc = glGetUniformLocation(shaderPID, "vertexNormalTransform");
-
+    SendMaterialDataToShader();
 
     const auto& pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
@@ -147,8 +144,30 @@ void Object::RenderModel() const {
         m_pShader->GetUniformValue<glm::mat4>(GetName(), "perspectiveMatrix")
                 = projectionMatrix * viewMatrix;
     }
-    if( m_pShader->HasUniform("CameraPos_GUIX") ) /*might using phong things...*/{
+    if( m_pShader->HasUniform("CameraPos_GUIX") ) {
         m_pShader->GetUniformValue<glm::vec3>(GetName(), "CameraPos_GUIX") = pCam->Eye();
+    }
+
+    //todo change whole systems only using these matrices
+    if(m_pShader->HasUniform("worldMatrix"))
+    {
+        m_pShader->GetUniformValue<glm::mat4>(GetName(), "worldMatrix") = modelToWorldMatrix;
+    }
+    if(m_pShader->HasUniform("viewMatrix"))
+    {
+        m_pShader->GetUniformValue<glm::mat4>(GetName(), "viewMatrix") = viewMatrix;
+    }
+    if(m_pShader->HasUniform("projectionMatrix"))
+    {
+        m_pShader->GetUniformValue<glm::mat4>(GetName(), "projectionMatrix") = projectionMatrix;
+    }
+    if(m_pShader->HasUniform("invertViewMatrix"))
+    {
+        m_pShader->GetUniformValue<glm::mat4>(GetName(), "invertViewMatrix") = glm::inverse(viewMatrix);
+    }
+    if(m_pShader->HasUniform("invertProjectionMatrix"))
+    {
+        m_pShader->GetUniformValue<glm::mat4>(GetName(), "invertProjectionMatrix") = glm::inverse(projectionMatrix);
     }
 
     m_pShader->SetAllUniforms(mObjectName);
@@ -263,21 +282,28 @@ void Object::RenderFaceNormal() const {
 
 void Object::Render() const {
     RenderModel();
+
+}
+
+void Object::PostRender() {
     if(mDoVertexNormalDrawing){
         RenderVertexNormal();
     }
     if(mDoFaceNormalDrawing){
         RenderFaceNormal();
     }
-}
 
-void Object::PostRender() {
+    //todo change this if statement
+        if(mAABB != nullptr && mAABB->GetColliderType() <= ColliderTypes::SPHERE)
+        {
+            static_cast<BoundingVolume*>(mAABB)->UpdateTransformFromParentObject(this);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            mAABB->Draw(GetPosition(), GetScale());
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
 
-}
-
-void Object::CleanUp() const {
-
-}
+void Object::CleanUp() const {}
 
 bool Object::SetShader(const std::string &shaderStr) {
     auto pShader = engine::GetShader(shaderStr);
@@ -291,7 +317,6 @@ bool Object::SetShader(const std::string &shaderStr) {
         {
             std::cerr << m_pShader->GetName() << "has error, try to load again!" << std::endl;
         }
-
     }
     return pShader != nullptr;
 }
@@ -325,14 +350,17 @@ void Object::TryCalculateMatrix() {
         tempToWorld = glm::rotate(tempToWorld, m_rotation.z, glm::vec3{ 0.f, 0.f, 1.f });
         tempToWorld = glm::scale(tempToWorld, m_scale);
 
-        //set to the bounding box height
+        //set the bounding box y height to 1
         tempToWorld = glm::scale(tempToWorld, 1.f / glm::vec3(meshSize.y));
-
         tempToWorld = glm::translate(tempToWorld, -meshCenter);
 
         mToWorldMatrix = tempToWorld;
         m_MatrixCacheDirty = false;
     }
+}
+
+Collider *Object::GetBoundingVolume() {
+    return mAABB;
 }
 
 glm::mat4 Object::GetObjectToWorldMatrix() const {
@@ -402,10 +430,10 @@ std::string Object::GetName() const {
 }
 
 void Object::SetColor(Color newColor) {
-    mEmissiveColor = newColor;
+    baseColor = newColor;
     if(m_pShader->HasUniform("EmissiveColor"))
     {
-        m_pShader->GetUniformValue<glm::vec3>(mObjectName, "EmissiveColor") = mEmissiveColor.AsVec3();
+        m_pShader->GetUniformValue<glm::vec3>(mObjectName, "EmissiveColor") = baseColor.AsVec3();
     }
 }
 
@@ -470,3 +498,60 @@ void Object::ChangeTexture(int slot, const std::string &textureName) {
     }
     mTextureSlots[slot] = textureName;
 }
+
+void Object::SendMaterialDataToShader() const {
+    if(m_pShader->HasUniform("baseColor"))
+    {
+        m_pShader->GetUniformValue<glm::vec3>(mObjectName, "baseColor") = baseColor.AsVec3();
+    }
+
+    if(m_pShader->HasUniform("material"))
+    {
+        glm::vec3 materialData = glm::vec3(metallic, roughness, 0.f);
+        m_pShader->GetUniformValue<glm::vec3>(mObjectName, "material") = materialData;
+    }
+}
+
+bool Object::DoColliding(Object *other) {
+    assert(other != nullptr);
+    if(mAABB == nullptr || other->GetBoundingVolume() == nullptr)
+    {
+        return false;
+    }
+    return mAABB->DoCollideWith(other->GetBoundingVolume());
+}
+
+void Object::SetBoundingVolume(ColliderTypes type) {
+    if(mAABB != nullptr && mAABB->GetColliderType() == type)
+    {
+        return;
+    }
+    if(mAABB != nullptr)
+    {
+        delete mAABB;
+        mAABB = nullptr;
+    }
+
+    if(mAABB == nullptr)
+    {
+        Collider* newCollider;
+        switch(type)
+        {
+            case ColliderTypes::SPHERE:
+            {
+                newCollider = new Sphere;
+                static_cast<Sphere*>(newCollider)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
+                break;
+            }
+            case ColliderTypes::AABB:
+            {
+                newCollider = new AABB;
+                static_cast<AABB*>(newCollider)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
+                break;
+            }
+        }
+        mAABB = newCollider;
+    }
+}
+
+

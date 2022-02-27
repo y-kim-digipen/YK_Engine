@@ -1,15 +1,16 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: GUIManager.cpp
 Purpose: Source file for GUIManager
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
+
 #include "GUIManager.h"
 
 #include "imgui.h"
@@ -274,6 +275,16 @@ namespace GUI {
                         ImGui::TreePop();
                     }
 
+                    if (ImGui::TreeNode("Material")) {
+                        static float sliderSpeed = 0.01f;
+                        ImGui::InputFloat("SliderSpeed", (float *) &sliderSpeed);
+                        ImGui::ColorEdit3("baseColor", (float *) &currentObject->baseColor);
+                        ImGui::DragFloat("metallic", (float *) &currentObject->metallic, sliderSpeed, 0.f, 1.f);
+                        ImGui::DragFloat
+                        ("roughness", (float *) &currentObject->roughness, sliderSpeed, 0.f, 1.f);
+                        ImGui::TreePop();
+                    }
+
                     if (ImGui::TreeNode("Mesh")) {
                         const std::string usingMeshStr = currentObject->GetUsingMeshName();
                         if (ImGui::BeginCombo("MeshList", usingMeshStr.c_str())) {
@@ -287,6 +298,20 @@ namespace GUI {
                                 }
                             }
                             ImGui::EndCombo();
+                        }
+                        ImGui::TreePop();
+                    }
+
+                    if (ImGui::TreeNode("Others")) {
+                        if (ImGui::Checkbox("VertexNormalDrawing", &currentObject->mDoVertexNormalDrawing)) {
+                            if (currentObject->mDoFaceNormalDrawing) {
+                                currentObject->mDoVertexNormalDrawing = false;
+                            }
+                        }
+                        if (ImGui::Checkbox("FaceNormalDrawing", &currentObject->mDoFaceNormalDrawing)) {
+                            if (currentObject->mDoVertexNormalDrawing) {
+                                currentObject->mDoFaceNormalDrawing = false;
+                            }
                         }
                         ImGui::TreePop();
                     }
@@ -582,8 +607,8 @@ namespace GUI {
             if (ImGui::BeginTabItem("Default")) {
                 static std::vector<std::string> Scenarios{"Scenario1", "Scenario2", "Scenario3"};
                 static std::string currentScenario = Scenarios.front();
-                ImGui::ColorEdit3("GlobalAmbient", &engine::GlobalAmbientColor.x);
-                ImGui::ColorEdit3("FogColor", &engine::FogColor.x);
+//                ImGui::ColorEdit3("GlobalAmbient", &engine::GlobalAmbientColor.x);
+//                ImGui::ColorEdit3("FogColor", &engine::FogColor.x);
 
                 ImGui::Text("%s",
                             (std::to_string(engine::GetCurrentScene()->GetNumActiveLights()) + " Lights").c_str());

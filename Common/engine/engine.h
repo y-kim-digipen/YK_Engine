@@ -1,14 +1,14 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: engine.h
 Purpose: Header file for engine
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 #ifndef SIMPLE_SCENE_ENGINE_H
 #define SIMPLE_SCENE_ENGINE_H
@@ -28,7 +28,7 @@ End Header --------------------------------------------------------*/
 
 #include "engine/graphic_misc/Color.h"
 #include "engine/graphic_misc/Mesh.h"
-//#include "SceneBase.h"
+#include "engine/scene_objects/Object.h"
 #include "engine/graphic_misc/Shader.h"
 #include "engine/graphic_misc/VAOManager.h"
 #include "engine/graphic_misc/VBOManager.h"
@@ -90,7 +90,6 @@ private:
     static void SetupScenes();
     static void SetupShaders();
     static void SetupMeshes();
-    static void SetupGUI();
 
     static void SetupTextures();
 
@@ -110,6 +109,7 @@ private:
 
     inline static ComponentManager<Mesh> mMeshManager;
     inline static ComponentManager<Shader> mShaderManager;
+    inline static ComponentManager<Object> mDebugDrawObjectsManager;
     inline static TextureManager mTextureManager;
 
     inline static VAOManager mVAOManager;
@@ -131,4 +131,7 @@ private:
 public:
     inline static FBO gBuffer;
     inline static FBO renderBuffer;
+    inline static FBO reflectionBuffer;
+
+    inline static FBO finalRenderBuffer;
 };

@@ -1,15 +1,16 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: Shader.h
 Purpose: Header file for Shader
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
+
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
@@ -89,27 +90,18 @@ public:
     bool HasError();
 
     std::string GetName();
-private:
+
+public:
     void SetUniform1b(char const *name, bool val);
-
     void SetUniform1i(char const *name, int val);
-
     void SetUniform1f(char const *name, float val);
-
     void SetUniformVec2f(char const *name, float x, float y);
-
     void SetUniformVec2f(char const *name, const glm::vec2 &v);
-
     void SetUniformVec3f(char const *name, float x, float y, float z);
-
     void SetUniformVec3f(char const *name, const glm::vec3 &v);
-
     void SetUniformVec4f(char const *name, const glm::vec4 &v);
-
     void SetUniformMatrix3f(char const *name, glm::mat3 &m);
-
     void SetUniformMatrix4f(char const *name, glm::mat4 &m);
-
     void deleteProgram();
 
 private:

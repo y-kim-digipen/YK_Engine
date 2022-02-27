@@ -3,6 +3,10 @@
 uniform mat4 modelToWorldTransform;     //todo change its' name to viewTransform
 uniform mat4 perspectiveMatrix;         //todo change its' name to projectionTransform
 
+uniform mat4 worldMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+
 uniform bool UsingGPUUV_GUIX = false;
 uniform int UVType_GUIX = 0; /*0. Planar, 1. Cylindarical, 2. Spherical, 3. CubeMap*/
 uniform vec3 ModelScale_GUIX = vec3(1.f);
@@ -17,20 +21,29 @@ in layout(location = 2) vec2 vUV;
 
 out VS_OUT
 {
-    vec3 fragPos;
-    vec3 fragNormal;
+    vec3 worldPos;
+    vec3 worldNormal;
     vec3 fragUV;
+
+    vec3 viewPos;
+    vec3 viewNormal;
 } vs_out;
 
 vec2 CalcGPU_UV(int type, vec3 vPositon, vec3 vNormal);
 
 void main() {
     gl_Position = perspectiveMatrix * modelToWorldTransform * vec4(vPosition, 1.f);
-    vec3 Position = (modelToWorldTransform * vec4(vPosition, 1.f)).xyz;
-    vec3 Normal = normalize(mat3(modelToWorldTransform) *  vertexNormal);
+    vec3 worldPosition = (modelToWorldTransform * vec4(vPosition, 1.f)).xyz / (modelToWorldTransform * vec4(vPosition, 1.f)).w;
+    vec3 worldNormal = normalize(mat3(modelToWorldTransform) *  vertexNormal);
 
-    vs_out.fragPos = Position;
-    vs_out.fragNormal = Normal;
+    vec3 viewPosition = (viewMatrix * worldMatrix * vec4(vPosition, 1.f)).xyz;
+    vec3 viewNormal = normalize(mat3(viewMatrix * worldMatrix) *  vertexNormal);
+
+    vs_out.worldPos = worldPosition;
+    vs_out.worldNormal = worldNormal;
+
+    vs_out.viewPos = viewPosition;
+    vs_out.viewNormal = viewNormal;
 
     vs_out.fragUV = vec3(UsingGPUUV_GUIX ? CalcGPU_UV(UVType_GUIX, vPosition, vertexNormal) : vUV, 1.f);
 }

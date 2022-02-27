@@ -1,0 +1,10 @@
+//
+// Created by yoonki on 2/26/22.
+//
+
+#ifndef ENGINE_PRIMITIVEOBJECT_H
+#define ENGINE_PRIMITIVEOBJECT_H
+
+
+
+#endif //ENGINE_PRIMITIVEOBJECT_H

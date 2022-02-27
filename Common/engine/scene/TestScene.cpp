@@ -1,14 +1,14 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: TestScene.cpp
 Purpose: Source file for TestScene
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 #include "TestScene.h"
 #include <glm/gtx/transform.hpp>
@@ -99,13 +99,35 @@ void TestScene::Init() {
     SceneBase::AddCamera();
     SceneBase::Init();
 
-    auto pPlaneObj = AddObject("Plane1", "Plane");
-    pPlaneObj->SetRotation(glm::vec3(-HALF_PI, 0.f, 0.f));
-    pPlaneObj->SetScale(glm::vec3(100.f, 100.f, 100.f));
-    pPlaneObj->SetPosition(glm::vec3(0.f, -0.45f, 0.f));
-    pPlaneObj->SetTextureOption(false);
+//    auto pPlaneObj = AddObject("Plane1", "Plane");
+//    pPlaneObj->SetRotation(glm::vec3(-HALF_PI, 0.f, 0.f));
+//    pPlaneObj->SetScale(glm::vec3(100.f, 100.f, 100.f));
+//    pPlaneObj->SetPosition(glm::vec3(0.f, -0.45f, 0.f));
+//    pPlaneObj->SetTextureOption(false);
 
-    AddObject("CentralObject", "Lucy", "DeferredRender");
+    auto pObj = AddObject("CentralObject", "Lucy", "DeferredRender");
+    pObj->SetBoundingVolume(ColliderTypes::SPHERE);
+
+    pObj = AddObject("CentralObject2", "Bunny", "DeferredRender");
+    pObj->SetPosition(glm::vec3(0.f, 0.f, 1.f));
+    pObj->SetBoundingVolume(ColliderTypes::AABB);
+
+//    for(int i = 0; i <= 5; ++i)
+//    {
+//        for(int j = 0; j <= 5; ++j)
+//        {
+//            Color objectColor{1.f, 0.5f, 0.5f};
+//            float metallic = 1.f / 5  * i;
+//            float roughness = 1.f / 5 * j;
+//            glm::vec3 position {-2.f * 5 / 2.f + (10.f / 5) * i, 6.f / 5.f * j, -1.5};
+//            auto ballObj = AddObject("4Sphere" + std::to_string(i) + std::to_string(j), "4Sphere", "DeferredRender");
+//            ballObj->baseColor = objectColor;
+//            ballObj->metallic = metallic;
+//            ballObj->roughness = roughness;
+//
+//            ballObj->SetPosition(position);
+//        }
+//    }
 }
 
 

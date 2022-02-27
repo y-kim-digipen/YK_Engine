@@ -1,14 +1,14 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: engine.cpp
 Purpose: Source file for engine
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 #include "engine.h"
 #include <iostream>
@@ -36,7 +36,7 @@ engine::engine() {
 
 int engine::InitWindow(glm::vec2 win_size, const std::string& title_name) {
     mTitleStr = title_name;
-    mWinSize = win_size * DPI;
+    mWinSize = win_size /* DPI*/;
 
     //GLFW settings
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -126,7 +126,6 @@ void engine::InitEngine() {
     for(auto& scene : m_pScenes){
         scene->Init();
     }
-    SetupGUI();
 
     lightUBO.createUBO(ENGINE_SUPPORT_MAX_LIGHTS * sizeof(Light::std140_structure) + sizeof(int));
     lightUBO.bindBufferBaseToBindingPoint(1);
@@ -181,7 +180,6 @@ void engine::Update() {
 }
 
 void engine::CleanUp() {
-    //delete GetInstance();
     mGUIManager.CleanUp();
     mShaderManager.Cleanup();
     mMeshManager.Cleanup();
@@ -339,14 +337,38 @@ void engine::SetupShaders() {
     pShader->CreateProgramAndLoadCompileAttachLinkShaders({
                                                                   {GL_VERTEX_SHADER,"../data/shaders/DeferredPBR.vert"},
                                                                   {GL_FRAGMENT_SHADER,"../data/shaders/DeferredPBR.frag"} });
+
+    pShader = mShaderManager.AddComponent("SSRShader", new Shader("SSRShader"), true);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../data/shaders/EngineShader/SSR.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/EngineShader/SSR.frag"} });
+
+    pShader = mShaderManager.AddComponent("CombineShader", new Shader("CombineShader"), false);
+    pShader->CreateProgramAndLoadCompileAttachLinkShaders({
+                                                                  {GL_VERTEX_SHADER,"../data/shaders/EngineShader/Combine.vert"},
+                                                                  {GL_FRAGMENT_SHADER,"../data/shaders/EngineShader/Combine.frag"} });
 }
 
 void engine::SetupMeshes() {
     OBJReader objReader;
 
-    auto
+    auto     pMesh = mMeshManager.AddComponent("ProceduralSphere", std::make_shared<Mesh>("ProceduralSphere"));
+    pMesh->ClearData();
+    pMesh->MakeProcedural(Mesh::ProceduralMeshType::SPHERE, 20, 20);
+    pMesh->Init();
 
-     pMesh = mMeshManager.AddComponent("Bunny", std::make_shared<Mesh>("Bunny"));
+    pMesh = mMeshManager.AddComponent("SphereModified", std::make_shared<Mesh>("SphereModified"));
+    pMesh->ClearData();
+    objReader.ReadOBJFile("../data/models/sphere_modified.obj", pMesh.get());
+    pMesh->Init();
+
+     pMesh = mMeshManager.AddComponent("Cube", std::make_shared<Mesh>("Cube"));
+    pMesh->ClearData();
+    objReader.ReadOBJFile("../data/models/cube2.obj", pMesh.get());
+    pMesh->Init();
+
+
+    pMesh = mMeshManager.AddComponent("Bunny", std::make_shared<Mesh>("Bunny"));
     pMesh->ClearData();
     objReader.ReadOBJFile("../data/models/bunny.obj", pMesh.get());
     pMesh->Init();
@@ -356,25 +378,10 @@ void engine::SetupMeshes() {
     objReader.ReadOBJFile("../data/models/lucy_princeton.obj", pMesh.get());
     pMesh->Init();
 
-    pMesh = mMeshManager.AddComponent("Cube", std::make_shared<Mesh>("Cube"));
-    pMesh->ClearData();
-    objReader.ReadOBJFile("../data/models/cube2.obj", pMesh.get());
-    pMesh->Init();
-
     pMesh = mMeshManager.AddComponent("Sphere", std::make_shared<Mesh>("Sphere"));
     pMesh->ClearData();
     objReader.ReadOBJFile("../data/models/sphere.obj", pMesh.get());
     pMesh->Init();
-
-    pMesh = mMeshManager.AddComponent("SphereModified", std::make_shared<Mesh>("SphereModified"));
-    pMesh->ClearData();
-    objReader.ReadOBJFile("../data/models/sphere_modified.obj", pMesh.get());
-    pMesh->Init();
-
-//    pMesh = mMeshManager.AddComponent("Rhino", std::make_shared<Mesh>("Rhino"));
-//    pMesh->ClearData();
-//    objReader.ReadOBJFile("../models/rhino.obj", pMesh.get());
-//    pMesh->Init();
 
     pMesh = mMeshManager.AddComponent("Cup", std::make_shared<Mesh>("Cup"));
     pMesh->ClearData();
@@ -391,10 +398,6 @@ void engine::SetupMeshes() {
     objReader.ReadOBJFile("../data/models/4Sphere.obj", pMesh.get());
     pMesh->Init();
 
-    pMesh = mMeshManager.AddComponent("ProceduralSphere", std::make_shared<Mesh>("ProceduralSphere"));
-    pMesh->ClearData();
-    pMesh->MakeProcedural(Mesh::ProceduralMeshType::SPHERE, 20, 20);
-    pMesh->Init();
 
     pMesh = mMeshManager.AddComponent("Plane", std::make_shared<Mesh>("Plane"));
     pMesh->ClearData();
@@ -410,23 +413,10 @@ void engine::SetupMeshes() {
     pMesh->ClearData();
     objReader.ReadOBJFile("../data/models/quad.obj", pMesh.get());
     pMesh->Init();
-
-
-//    pMesh = mMeshManager.AddComponent("Barrel", std::make_shared<Mesh>("Barrel"));
-//    pMesh->ClearData();
-//    objReader.ReadOBJFile("../models/Barrel.obj", pMesh.get());
-//    pMesh->Init();
-
 }
 
 SceneBase* engine::GetCurrentScene() {
     return m_pScenes[mFocusedSceneIdx];
-}
-
-void engine::SetupGUI() {
-//    using namespace GUI;
-//    auto pGUI = GetGUIManager().AddWindow("Info");
-//    pGUI->AddContent("Hey", new EngineInfoContent);
 }
 
 std::string engine::GetTitleName() {
@@ -467,17 +457,28 @@ void engine::SkipFrame(int Frames) {
 }
 
 void engine::SetupFBO() {
-    const glm::vec2 gBufferResolution = GetWindowSize();
+   const glm::vec2 gBufferResolution = GetWindowSize();
+//const glm::vec2 gBufferResolution = glm::vec2(1920, 1080);
     //Init gBuffer
     gBuffer.Init(gBufferResolution.x, gBufferResolution.y);
-    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("viewPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGB32F);
+    TextureObject* gBufferPosBufferTexture = GetTextureManager().CreateTexture("worldPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 0, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT0, gBufferPosBufferTexture);
-    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("normalBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGB32F);
+    TextureObject* gBufferNormalBufferTexture = GetTextureManager().CreateTexture("worldNormalBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT1, gBufferNormalBufferTexture);
     TextureObject* gBufferUVBufferTexture = GetTextureManager().CreateTexture("uvBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 2, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT2, gBufferUVBufferTexture);
     TextureObject* gBufferDepthBufferTexture = GetTextureManager().CreateTexture("depthBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 3, GL_RGB32F);
     gBuffer.SetAttachment(GL_COLOR_ATTACHMENT3, gBufferDepthBufferTexture);
+    TextureObject* gBufferAlbedoBufferTexture = GetTextureManager().CreateTexture("albedoBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 4, GL_RGB32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT4, gBufferAlbedoBufferTexture);
+    TextureObject* gBufferMaterialBufferTexture = GetTextureManager().CreateTexture("materialBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 5, GL_RGB32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT5, gBufferMaterialBufferTexture);
+
+    TextureObject* gBufferViewPosBufferTexture = GetTextureManager().CreateTexture("viewPosBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 6, GL_RGB32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT6, gBufferViewPosBufferTexture);
+    TextureObject* gBufferViewNormalBufferTexture = GetTextureManager().CreateTexture("viewNormalsBuffer", gBufferResolution.x, gBufferResolution.y, GL_TEXTURE_2D, 7, GL_RGB32F);
+    gBuffer.SetAttachment(GL_COLOR_ATTACHMENT7, gBufferViewNormalBufferTexture);
+
     gBuffer.SetDepthAttachment();
     gBuffer.UseDrawBuffers();
 
@@ -506,6 +507,29 @@ void engine::SetupFBO() {
     {
         std::cout << "[FBO Init] Frame Buffer Success" << std::endl;
     }
+
+//    reflectionBuffer.Init(renderBufferResolution.x, renderBufferResolution.y);
+//
+//    TextureObject* ssrBufferTexture = GetTextureManager().CreateTexture("SSRBufferTexture", renderBufferResolution.x, renderBufferResolution.y, GL_TEXTURE_2D, 1, GL_RGBA32F);
+//    reflectionBuffer.SetAttachment(GL_COLOR_ATTACHMENT1, ssrBufferTexture);
+//    reflectionBuffer.SetDepthAttachment();
+//    reflectionBuffer.UseDrawBuffers();
+//
+//    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+//    {
+//        std::cerr << "[FBO Error] Frame Buffer Incomplete" << std::endl;
+//    }
+//    else
+//    {
+//        std::cout << "[FBO Init] Frame Buffer Success" << std::endl;
+//    }
+//
+//    finalRenderBuffer.Init(renderBufferResolution.x, renderBufferResolution.y);
+//
+//    TextureObject* finalBufferTexture = GetTextureManager().CreateTexture("FinalBufferTexture", renderBufferResolution.x, renderBufferResolution.y, GL_TEXTURE_2D, 7, GL_RGBA32F);
+//    finalRenderBuffer.SetAttachment(GL_COLOR_ATTACHMENT7, finalBufferTexture);
+//    finalRenderBuffer.SetDepthAttachment();
+//    finalRenderBuffer.UseDrawBuffers();
 }
 
 void engine::ShutDown() {

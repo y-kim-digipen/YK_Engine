@@ -1,6 +1,15 @@
-//
-// Created by yoonki on 9/10/21.
-//
+/* Start Header -------------------------------------------------------
+Copyright (C) 2022 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the prior written
+consent of DigiPen Institute of Technology is prohibited.
+File Name: InputManager.h
+Purpose: Header file for InputManager
+Language: C++, g++
+Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
+Project: y.kim_CS350_1
+Author: Yoonki Kim, y.kim,  180002421
+Creation date: Feb 6, 2022
+End Header --------------------------------------------------------*/
 #ifndef ENGINE_INPUTMANAGER_H
 #define ENGINE_INPUTMANAGER_H
 #include <utility>

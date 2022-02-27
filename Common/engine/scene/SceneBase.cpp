@@ -1,21 +1,22 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: SceneBase.cpp
 Purpose: Source file for SceneBase
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 #include "SceneBase.h"
 #include "TestScene.h"
 #include "engine/engine.h"
 
 #include <iostream>
-
+#include <engine/scene_objects/Object.h>
+#include <engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h>
 void SceneBase::Init() {
     if(m_pCameras.empty() == false){
         mFocusedCameraIdx = 0;
@@ -35,6 +36,18 @@ void SceneBase::Init() {
 //    Result_FSQ->ChangeTexture(2, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT2));
     Result_FSQ->ChangeTexture(2, "");
     Result_FSQ->ChangeTexture(3, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT3));
+    Result_FSQ->ChangeTexture(4, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT4));
+    Result_FSQ->ChangeTexture(5, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT5));
+
+//    Reflect_FSQ = new Object("Quad", "Quad", "SSRShader");
+//    Reflect_FSQ->ChangeTexture(0, /*engine::renderBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0)*/"FinalRenderBufferTexture");
+//    Reflect_FSQ->ChangeTexture(1, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT6));
+//    Reflect_FSQ->ChangeTexture(2, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT7));
+//    Reflect_FSQ->ChangeTexture(3, engine::gBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT5));
+//
+//    Combine_FSQ  = new Object("Quad", "Quad", "CombineShader");
+//    Combine_FSQ->ChangeTexture(0, engine::renderBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT0));
+//    Combine_FSQ->ChangeTexture(1, engine::reflectionBuffer.GetAttachmentTextureName(GL_COLOR_ATTACHMENT1));
 }
 
 void SceneBase::PreRender() {
@@ -60,11 +73,13 @@ void SceneBase::Render() const {
             pObject->Render();
         }
     }
+}
 
+void SceneBase::PostRender() {
     UseFBO(engine::renderBuffer.GetFBOHandle(), engine::GetWindowSize().x, engine::GetWindowSize().y, true);
     Result_FSQ->Render();
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.GetFBOHandle());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, engine::gBuffer.GetFBOHandle());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, engine::renderBuffer.GetFBOHandle());
 
     glBlitFramebuffer(0, 0, engine::GetWindowSize().x, engine::GetWindowSize().y,
@@ -78,10 +93,6 @@ void SceneBase::Render() const {
         }
     }
 
-    UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
-}
-
-void SceneBase::PostRender() {
     for(auto& obj : m_pDeferredObjects){
         auto& pObject = obj.second;
         pObject->PostRender();
@@ -90,6 +101,42 @@ void SceneBase::PostRender() {
         auto& pLight = light.second;
         if(pLight->IsRenderReady()) {
             pLight->PostRender();
+        }
+    }
+
+//    UseFBO(engine::reflectionBuffer.GetFBOHandle(), engine::GetWindowSize().x, engine::GetWindowSize().y, true);
+//    Reflect_FSQ->Render();
+//
+//    UseFBO(engine::finalRenderBuffer.GetFBOHandle(), engine::GetWindowSize().x, engine::GetWindowSize().y, true);
+//    Reflect_FSQ->Render();
+    UseFBO(0, engine::GetWindowSize().x, engine::GetWindowSize().y, true);
+
+    for(auto& obj : m_pDeferredObjects){
+        if(obj.second->GetBoundingVolume() != nullptr)
+        {
+            obj.second->GetBoundingVolume()->SetDebuggingColor(DebugColorGreen);
+        }
+    }
+
+    for(auto& obj : m_pDeferredObjects){
+        auto& pObject = obj.second;
+        for(auto& otherObject : m_pDeferredObjects){
+            auto& pOtherObject = otherObject.second;
+            if(pObject == pOtherObject)
+            {
+                continue;
+            }
+            bool collisionRes = pObject->DoColliding(pOtherObject.get());
+            auto bv1 = pObject->GetBoundingVolume();
+            auto bv2 = pOtherObject->GetBoundingVolume();
+
+            if(collisionRes == true)
+            {
+                auto bv1 = pObject->GetBoundingVolume();
+                auto bv2 = pOtherObject->GetBoundingVolume();
+                bv1->SetDebuggingColor(DebugColorRed);
+                bv2->SetDebuggingColor(DebugColorRed);
+            }
         }
     }
 }

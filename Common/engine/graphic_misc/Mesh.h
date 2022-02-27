@@ -1,15 +1,16 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: Mesh.h
 Purpose: Header file for Mesh
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
+
 #ifndef SIMPLE_OBJ_SCENE_MESH_H
 #define SIMPLE_OBJ_SCENE_MESH_H
 
@@ -22,6 +23,7 @@ End Header --------------------------------------------------------*/
 #include "VBOManager.h"
 #include "object_components/ComponentBase.h"
 
+class BoundingVolume;
 class Mesh : public ComponentBase
 {
 public:
@@ -38,6 +40,7 @@ public:
     void MakeProcedural(ProceduralMeshType type, int stacks, int slices);
     // Get attribute values buffer
     GLfloat *getVertexBuffer();             // attribute 0
+    std::vector<glm::vec3>& getVertexBufferVectorForm();
     GLfloat *getVertexNormals();            // attribute 1
     GLfloat *getVertexUVs();                // attribute 2
 
@@ -103,7 +106,6 @@ public:
     void SetDrawType(DrawType drawType);
     void ChangeUVType(Mesh::UVType newType);
     Mesh::UVType GetCurrentUsingCPUMeshUV() const;
-
 private:
     void IndexingProceduralMesh(int stacks, int slices);
     void MakeProceduralSphere(int stacks, int slices);

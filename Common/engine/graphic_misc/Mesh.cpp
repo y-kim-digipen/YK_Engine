@@ -1,15 +1,16 @@
 /* Start Header -------------------------------------------------------
-Copyright (C) 2021 DigiPen Institute of Technology.
+Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
 File Name: Mesh.cpp
 Purpose: Source file for Mesh
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
-Project: y.kim_CS300_2
+Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
-Creation date: Nov 7, 2021
+Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
+
 #include <iostream>
 #include <set>
 
@@ -20,9 +21,11 @@ End Header --------------------------------------------------------*/
 #include "Mesh.h"
 #include "Shader.h"
 #include "VAOManager.h"
+#include "BoundingVolume/BasicBoundingVolumes.h"
 
 void Mesh::Init() {
     engine::GetVBOManager().SetUpVBO(this);
+
 }
 
 // Initialize the data members in the mesh
@@ -37,7 +40,6 @@ void Mesh::ClearData()
     vertexFaceNormalsDisplay.clear();
 
     normalLength = 0.5f;
-
     return;
 }
 
@@ -48,6 +50,12 @@ GLfloat *Mesh::getVertexBuffer()
 {
     return reinterpret_cast<GLfloat *>(vertexBuffer.data());
 }
+
+
+std::vector<glm::vec3> &Mesh::getVertexBufferVectorForm() {
+    return vertexBuffer;
+}
+
 
 GLfloat *Mesh::getVertexNormals()
 {
@@ -595,7 +603,6 @@ void Mesh::ChangeUVType(Mesh::UVType newType) {
 Mesh::UVType Mesh::GetCurrentUsingCPUMeshUV() const {
     return mCurrentUV;
 }
-
 
 
 
