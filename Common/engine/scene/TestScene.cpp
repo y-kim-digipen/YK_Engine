@@ -14,11 +14,14 @@ End Header --------------------------------------------------------*/
 #include <glm/gtx/transform.hpp>
 #include <random>
 #include "engine/engine.h"
+#include "engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h"
+#include "engine/scene_objects/PrimitiveObject.h"
+
 using std::placeholders::_1;
 void TestScene::Init() {
     SceneBase::Init();
     constexpr float orbitRadius = 1.5f;
-    [[maybe_unused]]static auto DrawOrbit = [&, initialSetting = true](Object *obj) mutable {
+    [[maybe_unused]]static auto DrawOrbit = [&, initialSetting = true](MeshObject *obj) mutable {
         static std::vector<glm::vec3> orbitLines;
         constexpr int segments = 100;
         static GLuint vertexVBO;
@@ -99,18 +102,30 @@ void TestScene::Init() {
     SceneBase::AddCamera();
     SceneBase::Init();
 
-//    auto pPlaneObj = AddObject("Plane1", "Plane");
+//    auto pPlaneObj = AddMeshObject("Plane1", "Plane");
 //    pPlaneObj->SetRotation(glm::vec3(-HALF_PI, 0.f, 0.f));
 //    pPlaneObj->SetScale(glm::vec3(100.f, 100.f, 100.f));
 //    pPlaneObj->SetPosition(glm::vec3(0.f, -0.45f, 0.f));
 //    pPlaneObj->SetTextureOption(false);
 
-    auto pObj = AddObject("CentralObject", "Lucy", "DeferredRender");
-    pObj->SetBoundingVolume(ColliderTypes::SPHERE);
+    auto pObj = AddObject<MeshObject>("CentralObject", "Lucy", "DeferredRender");
+//    pObj->BindFunction(DrawOrbit);
+    Sphere* objCollider = new Sphere();
+    objCollider->BuildFromVertices(engine::GetMesh(static_cast<MeshObject*>(pObj)->GetUsingMeshName())->getVertexBufferVectorForm());
+    pObj->SetCollider(objCollider);
+    pObj->AddPosition(glm::vec3(1.f, 1.f, 1.f));
 
-    pObj = AddObject("CentralObject2", "Bunny", "DeferredRender");
-    pObj->SetPosition(glm::vec3(0.f, 0.f, 1.f));
-    pObj->SetBoundingVolume(ColliderTypes::AABB);
+    pObj = AddObject<MeshObject>("CentralObject2", "Bunny", "DeferredRender");
+    static_cast<MeshObject*>(pObj)->SetPosition(glm::vec3(0.f, 0.f, 1.f));
+    AABB* objCollider2 = new AABB();
+    objCollider2->BuildFromVertices(engine::GetMesh(static_cast<MeshObject*>(pObj)->GetUsingMeshName())->getVertexBufferVectorForm());
+    pObj->SetCollider(objCollider2);
+    pObj->AddPosition(glm::vec3(1.f, 1.f, 1.f));
+
+//    auto primitiveObj = AddObject<PrimitiveObject<Triangle>>("Triangle", glm::vec3(0.f), glm::vec3(0.f, 1.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
+////    auto primitiveObj2 = AddObject<PrimitiveObject<Point3D>>("Point", glm::vec3(0.f, 0.5f, 0.2f));
+//     AddObject<PrimitiveObject<Ray>>("Ray", glm::vec3(0.f, 0.0f, 0.0f), glm::vec3(1.f,0.f, 1.f));
+     AddObject<PrimitiveObject<Plane>>("Plane", glm::vec4(1.f, 0.0f, 0.0f, 1.f));
 
 //    for(int i = 0; i <= 5; ++i)
 //    {
@@ -120,7 +135,7 @@ void TestScene::Init() {
 //            float metallic = 1.f / 5  * i;
 //            float roughness = 1.f / 5 * j;
 //            glm::vec3 position {-2.f * 5 / 2.f + (10.f / 5) * i, 6.f / 5.f * j, -1.5};
-//            auto ballObj = AddObject("4Sphere" + std::to_string(i) + std::to_string(j), "4Sphere", "DeferredRender");
+//            auto ballObj = AddMeshObject("4Sphere" + std::to_string(i) + std::to_string(j), "4Sphere", "DeferredRender");
 //            ballObj->baseColor = objectColor;
 //            ballObj->metallic = metallic;
 //            ballObj->roughness = roughness;

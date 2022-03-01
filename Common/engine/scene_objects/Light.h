@@ -14,25 +14,21 @@ End Header --------------------------------------------------------*/
 #ifndef ENGINE_LIGHT_H
 #define ENGINE_LIGHT_H
 
-#include "engine/scene_objects/Object.h"
+#include "engine/scene_objects/MeshObject.h"
 namespace GUI{
     class LightDetailContent;
 }
-class Light : public Object{
+class Light : public MeshObject{
     friend class GUI::LightDetailContent;
     friend class LightManager;
 public:
-    Light(const std::string& lightName) : Object(lightName, "Bulb", "DiffuseShader") {
+    Light(const std::string& lightName) : MeshObject(lightName, "Bulb", "DiffuseShader") {
         SetPosition(glm::vec3(1.f, 1.f, 0.f));
     }
 
-    Light(const std::string& lightName, const std::string& meshName, const std::string& shaderName) : Object(lightName, meshName, shaderName) { }
+    Light(const std::string& lightName, const std::string& meshName, const std::string& shaderName) : MeshObject(lightName, meshName, shaderName) { }
 
-    void PreRender() override
-    {
-        std140_structure.position = GetPosition();
-        Object::PreRender();
-    }
+    void PreRender() override;
 
     void* GetSTD140Structure(){
         return &std140_structure.position;
@@ -74,5 +70,6 @@ public:
         float P = 1.f;
     } std140_structure;
 };
+
 
 #endif //ENGINE_LIGHT_H

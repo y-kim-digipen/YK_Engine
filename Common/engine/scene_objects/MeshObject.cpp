@@ -2,15 +2,15 @@
 Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
-File Name: Object.cpp
-Purpose: Source file for Object
+File Name: MeshObject.cpp
+Purpose: Source file for MeshObject
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
 Project: y.kim_CS350_1
 Author: Yoonki Kim, y.kim,  180002421
 Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
-#include "Object.h"
+#include "MeshObject.h"
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -22,13 +22,13 @@ End Header --------------------------------------------------------*/
 #include "Camera.h"
 #include "engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h"
 
-Object::Object(const std::string& name) : Object(name, std::shared_ptr<Mesh>(), std::shared_ptr<Shader>()) {}
+MeshObject::MeshObject(const std::string& name) : MeshObject(name, std::shared_ptr<Mesh>(), std::shared_ptr<Shader>()) {}
 
-Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader)
-        : m_pMesh(pMesh), m_pShader(pShader), mObjectName(name), m_MatrixCacheDirty(true), mToWorldMatrix(1.f),
+MeshObject::MeshObject(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader)
+        : BaseObject(name, ObjectTypes::MESH), m_pMesh(pMesh), m_pShader(pShader), m_MatrixCacheDirty(true), mToWorldMatrix(1.f),
           m_position(), m_scale(1.f), m_rotation(0.f), baseColor(Color(0.f)), mUVType(Mesh::PLANAR_UV) {
     if(m_pShader){
-        m_pShader->SetShaderBuffer(mObjectName);
+        m_pShader->SetShaderBuffer(name);
     }
     SetColor(baseColor);
     mDoVertexNormalDrawing = false;
@@ -41,43 +41,33 @@ Object::Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared
 
 //    mTextureSlots[0] = "tex_object0";
 //    mTextureSlots[1] = "tex_object1";
-
-//    mAABB = new AABB();
-//    static_cast<AABB*>(mAABB)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
 }
 
-Object::Object(const std::string& name, const std::string &meshStr, const std::string &shaderStr)
-        : Object(name, engine::GetMesh(meshStr), engine::GetShader(shaderStr)) {
+MeshObject::MeshObject(const std::string& name, const std::string &meshStr, const std::string &shaderStr)
+        : MeshObject(name, engine::GetMesh(meshStr), engine::GetShader(shaderStr)) {
     mMeshName = meshStr;
     mShaderName = shaderStr;
 }
 
-Object::~Object() {
-    if(mAABB != nullptr)
-    {
-        delete mAABB;
-    }
-    std::cout << "[Object deleted] " << mObjectName << std::endl;
+MeshObject::~MeshObject() {
+    std::cout << "[MeshObject deleted] " << mObjectName << std::endl;
 }
 
 
-void Object::Init() {
+void MeshObject::Init() {
     assert(m_pMesh != nullptr && m_pShader != nullptr);
 }
 
-void Object::PreRender() {
+void MeshObject::PreRender() {
     mDoRender = ((m_pShader != nullptr) & (m_pMesh != nullptr)) | !m_pShader->HasError();
 
-    if(mAdditionalFunction != nullptr && mUpdateAdditionalFunction){
-        mAdditionalFunction();
-    }
     //todo just for debugging.
     m_MatrixCacheDirty = true;
     TryCalculateMatrix();
     SendMeshDataToShader();
 }
 
-void Object::RenderModel() const {
+void MeshObject::RenderModel() const {
     const GLint shaderPID = m_pShader->GetProgramID();
 
     //setting&binding buffer
@@ -184,7 +174,7 @@ void Object::RenderModel() const {
     glUseProgram(0);
 }
 
-void Object::RenderVertexNormal() const {
+void MeshObject::RenderVertexNormal() const {
     auto pNormalDrawShader = engine::GetShader("NormalDrawShader");
     const GLint shaderPID = pNormalDrawShader->GetProgramID();
 
@@ -232,7 +222,7 @@ void Object::RenderVertexNormal() const {
     glUseProgram(0);
 }
 
-void Object::RenderFaceNormal() const {
+void MeshObject::RenderFaceNormal() const {
     auto pNormalDrawShader = engine::GetShader("FaceNormalDrawShader");
     const GLint shaderPID = pNormalDrawShader->GetProgramID();
 
@@ -280,32 +270,36 @@ void Object::RenderFaceNormal() const {
     glUseProgram(0);
 }
 
-void Object::Render() const {
+void MeshObject::Render() const {
     RenderModel();
-
 }
 
-void Object::PostRender() {
-    if(mDoVertexNormalDrawing){
+void MeshObject::PostRender() {
+    if (mDoVertexNormalDrawing) {
         RenderVertexNormal();
     }
-    if(mDoFaceNormalDrawing){
+    if (mDoFaceNormalDrawing) {
         RenderFaceNormal();
     }
 
     //todo change this if statement
-        if(mAABB != nullptr && mAABB->GetColliderType() <= ColliderTypes::SPHERE)
-        {
-            static_cast<BoundingVolume*>(mAABB)->UpdateTransformFromParentObject(this);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            mAABB->Draw(GetPosition(), GetScale());
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+    if (mCollider != nullptr && mCollider->GetColliderType() <= ColliderTypes::SPHERE) {
+        static_cast<BoundingVolume *>(mCollider)->UpdateTransformFromParentObject(this);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glLineWidth(2.f);
+        mCollider->Draw(GetPosition(), GetScale());
+        glLineWidth(1.f);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-void Object::CleanUp() const {}
+    if (mAdditionalFunction != nullptr && mUpdateAdditionalFunction) {
+        mAdditionalFunction();
+    }
+}
 
-bool Object::SetShader(const std::string &shaderStr) {
+void MeshObject::CleanUp() const {}
+
+bool MeshObject::SetShader(const std::string &shaderStr) {
     auto pShader = engine::GetShader(shaderStr);
     if(pShader){
         m_pShader->DeleteShaderBuffer(mObjectName);
@@ -321,7 +315,7 @@ bool Object::SetShader(const std::string &shaderStr) {
     return pShader != nullptr;
 }
 
-bool Object::SetMesh(const std::string &meshStr) {
+bool MeshObject::SetMesh(const std::string &meshStr) {
     auto pMesh = engine::GetMesh(meshStr);
     if(pMesh){
         //todo init mesh here
@@ -331,11 +325,11 @@ bool Object::SetMesh(const std::string &meshStr) {
     return pMesh != nullptr;
 }
 
-bool Object::IsRenderReady() const {
+bool MeshObject::IsRenderReady() const {
     return mDoRender;
 }
 
-void Object::TryCalculateMatrix() {
+void MeshObject::TryCalculateMatrix() {
     if(m_MatrixCacheDirty){
         glm::mat4 tempToWorld{1.f};
 
@@ -359,77 +353,73 @@ void Object::TryCalculateMatrix() {
     }
 }
 
-Collider *Object::GetBoundingVolume() {
-    return mAABB;
+Collider *MeshObject::GetBoundingVolume() {
+    return mCollider;
 }
 
-glm::mat4 Object::GetObjectToWorldMatrix() const {
+glm::mat4 MeshObject::GetObjectToWorldMatrix() const {
     return mToWorldMatrix;
 }
 
-std::string Object::GetUsingMeshName() const {
+std::string MeshObject::GetUsingMeshName() const {
     return mMeshName;
 }
 
-std::string Object::GetUsingShaderName() const {
+std::string MeshObject::GetUsingShaderName() const {
     return mShaderName;
 }
 
-glm::vec3 Object::GetPosition() {
+glm::vec3 MeshObject::GetPosition() {
     return m_position;
 }
 
-void Object::SetPosition(glm::vec3 position) {
+void MeshObject::SetPosition(glm::vec3 position) {
     const glm::vec3 amount = position - m_position;
     AddPosition(amount);
     m_MatrixCacheDirty = true;
 }
 
-void Object::AddPosition(glm::vec3 amount) {
+void MeshObject::AddPosition(glm::vec3 amount) {
     m_position += amount;
     m_MatrixCacheDirty = true;
 }
 
-glm::vec3 Object::GetRotation() {
+glm::vec3 MeshObject::GetRotation() {
     return m_rotation;
 }
 
-void Object::SetRotation(glm::vec3 rotation) {
+void MeshObject::SetRotation(glm::vec3 rotation) {
     const glm::vec3 amount = rotation - m_rotation;
     AddRotation(amount);
     m_MatrixCacheDirty = true;
 }
 
-void Object::AddRotation(glm::vec3 amount) {
+void MeshObject::AddRotation(glm::vec3 amount) {
     m_rotation += amount;
     m_MatrixCacheDirty = true;
 }
 
-glm::vec3 Object::GetScale() {
+glm::vec3 MeshObject::GetScale() {
     return m_scale;
 }
 
-void Object::SetScale(glm::vec3 scale) {
+void MeshObject::SetScale(glm::vec3 scale) {
     const glm::vec3 amount = scale - m_scale;
     AddScale(amount);
     m_MatrixCacheDirty = true;
 }
 
-void Object::AddScale(glm::vec3 amount) {
+void MeshObject::AddScale(glm::vec3 amount) {
     m_scale += amount;
     m_MatrixCacheDirty = true;
 }
 
-void Object::BindFunction(std::function<void(Object *)> func) {
+void MeshObject::BindFunction(std::function<void(MeshObject *)> func) {
     mAdditionalFunction = std::bind(func, this);
     mUpdateAdditionalFunction = true;
 }
 
-std::string Object::GetName() const {
-    return mObjectName;
-}
-
-void Object::SetColor(Color newColor) {
+void MeshObject::SetColor(Color newColor) {
     baseColor = newColor;
     if(m_pShader->HasUniform("EmissiveColor"))
     {
@@ -437,7 +427,7 @@ void Object::SetColor(Color newColor) {
     }
 }
 
-void Object::SendMeshDataToShader()
+void MeshObject::SendMeshDataToShader()
 {
     if(mUsingGPUUV)
     {
@@ -478,20 +468,20 @@ void Object::SendMeshDataToShader()
 
 }
 
-void Object::RemoveFunction() {
+void MeshObject::RemoveFunction() {
     mAdditionalFunction = nullptr;
 }
 
-void Object::SetFunctionUpdate(bool updateStatus) {
+void MeshObject::SetFunctionUpdate(bool updateStatus) {
     mUpdateAdditionalFunction = updateStatus;
 }
 
-void Object::SetTextureOption(bool usingTexture, bool usingGPUUV) {
+void MeshObject::SetTextureOption(bool usingTexture, bool usingGPUUV) {
     mUsingTexture = usingTexture;
     mUsingGPUUV = usingGPUUV;
 }
 
-void Object::ChangeTexture(int slot, const std::string &textureName) {
+void MeshObject::ChangeTexture(int slot, const std::string &textureName) {
     if(slot >= mTextureSlots.size())
     {
         throw std::out_of_range("Trying to access out of texture slots");
@@ -499,7 +489,7 @@ void Object::ChangeTexture(int slot, const std::string &textureName) {
     mTextureSlots[slot] = textureName;
 }
 
-void Object::SendMaterialDataToShader() const {
+void MeshObject::SendMaterialDataToShader() const {
     if(m_pShader->HasUniform("baseColor"))
     {
         m_pShader->GetUniformValue<glm::vec3>(mObjectName, "baseColor") = baseColor.AsVec3();
@@ -511,47 +501,3 @@ void Object::SendMaterialDataToShader() const {
         m_pShader->GetUniformValue<glm::vec3>(mObjectName, "material") = materialData;
     }
 }
-
-bool Object::DoColliding(Object *other) {
-    assert(other != nullptr);
-    if(mAABB == nullptr || other->GetBoundingVolume() == nullptr)
-    {
-        return false;
-    }
-    return mAABB->DoCollideWith(other->GetBoundingVolume());
-}
-
-void Object::SetBoundingVolume(ColliderTypes type) {
-    if(mAABB != nullptr && mAABB->GetColliderType() == type)
-    {
-        return;
-    }
-    if(mAABB != nullptr)
-    {
-        delete mAABB;
-        mAABB = nullptr;
-    }
-
-    if(mAABB == nullptr)
-    {
-        Collider* newCollider;
-        switch(type)
-        {
-            case ColliderTypes::SPHERE:
-            {
-                newCollider = new Sphere;
-                static_cast<Sphere*>(newCollider)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
-                break;
-            }
-            case ColliderTypes::AABB:
-            {
-                newCollider = new AABB;
-                static_cast<AABB*>(newCollider)->BuildFromVertices(m_pMesh->getVertexBufferVectorForm());
-                break;
-            }
-        }
-        mAABB = newCollider;
-    }
-}
-
-

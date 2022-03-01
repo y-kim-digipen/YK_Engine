@@ -1249,7 +1249,7 @@ static void ShowDemoWindowWidgets()
             for (int n = 0; n < 5; n++)
             {
                 char buf[32];
-                sprintf(buf, "Object %d", n);
+                sprintf(buf, "MeshObject %d", n);
                 if (ImGui::Selectable(buf, selected == n))
                     selected = n;
             }
@@ -1263,7 +1263,7 @@ static void ShowDemoWindowWidgets()
             for (int n = 0; n < 5; n++)
             {
                 char buf[32];
-                sprintf(buf, "Object %d", n);
+                sprintf(buf, "MeshObject %d", n);
                 if (ImGui::Selectable(buf, selection[n]))
                 {
                     if (!ImGui::GetIO().KeyCtrl)    // Clear selection when CTRL is not held
@@ -7097,7 +7097,7 @@ static void ShowPlaceholderObject(const char* prefix, int uid)
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::AlignTextToFramePadding();
-    bool node_open = ImGui::TreeNode("Object", "%s_%u", prefix, uid);
+    bool node_open = ImGui::TreeNode("MeshObject", "%s_%u", prefix, uid);
     ImGui::TableSetColumnIndex(1);
     ImGui::Text("my sailor is rich");
 
@@ -7158,7 +7158,7 @@ static void ShowExampleAppPropertyEditor(bool* p_open)
         // Iterate placeholder objects (all the same data)
         for (int obj_i = 0; obj_i < 4; obj_i++)
         {
-            ShowPlaceholderObject("Object", obj_i);
+            ShowPlaceholderObject("MeshObject", obj_i);
             //ImGui::Separator();
         }
         ImGui::EndTable();

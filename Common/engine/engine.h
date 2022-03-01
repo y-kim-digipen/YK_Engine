@@ -28,7 +28,7 @@ End Header --------------------------------------------------------*/
 
 #include "engine/graphic_misc/Color.h"
 #include "engine/graphic_misc/Mesh.h"
-#include "engine/scene_objects/Object.h"
+#include "engine/scene_objects/MeshObject.h"
 #include "engine/graphic_misc/Shader.h"
 #include "engine/graphic_misc/VAOManager.h"
 #include "engine/graphic_misc/VBOManager.h"
@@ -109,7 +109,7 @@ private:
 
     inline static ComponentManager<Mesh> mMeshManager;
     inline static ComponentManager<Shader> mShaderManager;
-    inline static ComponentManager<Object> mDebugDrawObjectsManager;
+    inline static ComponentManager<MeshObject> mDebugDrawObjectsManager;
     inline static TextureManager mTextureManager;
 
     inline static VAOManager mVAOManager;

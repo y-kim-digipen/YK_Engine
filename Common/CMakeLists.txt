@@ -48,8 +48,8 @@ add_executable( ${TARGET_NAME}
         ../Common/object_components/ComponentManager.h
         ../Common/object_components/ComponentManager.inl
         ../Common/engine/scene/TestScene.h
-        ../Common/engine/scene_objects/Object.cpp
-        ../Common/engine/scene_objects/Object.h
+        engine/scene_objects/MeshObject.cpp
+        engine/scene_objects/MeshObject.h
         ../Common/engine/scene_objects/Camera.cpp
         ../Common/engine/scene_objects/Camera.h
         ../Common/engine/scene/SceneBase.cpp
@@ -77,7 +77,7 @@ add_executable( ${TARGET_NAME}
         ../Common/engine/GUI/GUIManager.h
         ../Common/engine/GUI/GUIManager.cpp
         ../Common/engine/GUI/GUIObject.h
-        engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.cpp engine/scene_objects/PrimitiveObject.cpp engine/scene_objects/PrimitiveObject.h engine/graphic_misc/BoundingVolume/ColliderTypes.h)
+        engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.cpp engine/scene_objects/BaseObject.cpp engine/scene_objects/BaseObject.h engine/graphic_misc/BoundingVolume/ColliderTypes.h engine/scene_objects/PrimitiveObject.inl engine/scene_objects/PrimitiveObject.h engine/scene_objects/Light.cpp)
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )

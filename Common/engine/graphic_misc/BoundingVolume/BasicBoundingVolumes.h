@@ -7,10 +7,10 @@
 
 #include <vector>
 #include <glm/glm.hpp>
-#include "engine/scene_objects/Object.h"
+#include "engine/scene_objects/MeshObject.h"
 #include "ColliderTypes.h"
 
-class Object;
+class MeshObject;
 
 struct ColliderDrawerInfo
 {
@@ -18,8 +18,9 @@ struct ColliderDrawerInfo
     std::string shaderStr = "DiffuseShader";
 };
 
-static Color DebugColorGreen = Color(0.f, 1.f, 0.f);
-static Color DebugColorRed = Color(1.f, 0.f, 0.f);
+//static Color DebugColorGreen = Color(0.f, 1.f, 0.f);
+//static Color DebugColorRed = Color(1.f, 0.f, 0.f);
+static Color DebugColorWhite = Color(1.f, 1.f, 1.f);
 
 class Collider
 {
@@ -28,18 +29,30 @@ public:
     virtual bool DoCollideWith(Collider* other) = 0;
     virtual void Draw(const glm::vec3& position, const glm::vec3& scale) = 0;
     [[nodiscard]] ColliderTypes GetColliderType() const;
-
+    void ResetDebuggingColor()
+    {
+        mDebuggingColor = DebugColorWhite.AsVec3();
+        numNestingColors = 0;
+    }
     void SetDebuggingColor(Color newColor)
     {
-        mDebuggingColor = newColor;
+        if(mDebuggingColor == DebugColorWhite.AsVec3())
+        {
+            mDebuggingColor = glm::vec3();
+        }
+        mDebuggingColor += newColor.AsVec3();
+        numNestingColors++;
     }
     Color GetDebuggingColor()
     {
-        return mDebuggingColor;
+        mDebuggingColor /= numNestingColors;
+        return Color(mDebuggingColor.x,mDebuggingColor.y, mDebuggingColor.z );
     }
 
 protected:
-    Color mDebuggingColor = DebugColorGreen;
+    glm::vec3 mDebuggingColor = DebugColorWhite.AsVec3();
+    int numNestingColors;
+    ColliderDrawerInfo mDrawerInfo;
     ColliderTypes mType;
 };
 
@@ -51,12 +64,12 @@ public:
     virtual void BuildFromVertices(const std::vector<glm::vec3>& vPos) = 0;
     void Draw(const glm::vec3& position, const glm::vec3& scale) override;
     bool DoCollideWith(Collider* other) override;
-    virtual void UpdateTransformFromParentObject(Object* parent) = 0;
+    virtual void UpdateTransformFromParentObject(MeshObject* parent) = 0;
 
 protected:
     [[nodiscard]] virtual glm::mat4 GetModelToWorldMatrix() const = 0;
 protected:
-    ColliderDrawerInfo mDrawerInfo;
+
     glm::vec3 mScale{1.f};
 };
 
@@ -67,7 +80,7 @@ public:
     ~AABB() override;
     void BuildFromVertices(const std::vector<glm::vec3>& vPos) override;
     bool DoCollideWith(Collider* other) override;
-    void UpdateTransformFromParentObject(Object* parent) override;
+    void UpdateTransformFromParentObject(MeshObject* parent) override;
     [[nodiscard]] glm::vec3 GetCenter() const;
     [[nodiscard]] glm::vec3 GetHalfExtent() const;
 private:
@@ -83,7 +96,7 @@ public:
     ~Sphere() override;
     void BuildFromVertices(const std::vector<glm::vec3>& vPos) override;
     bool DoCollideWith(Collider* other) override;
-    void UpdateTransformFromParentObject(Object* parent) override;
+    void UpdateTransformFromParentObject(MeshObject* parent) override;
     [[nodiscard]] glm::vec3 GetCenter() const;
     [[nodiscard]] float GetRadius() const;
 private:
@@ -114,7 +127,7 @@ public:
         mCoordinate = coord;
     }
 
-private:
+
     glm::vec3 mCoordinate;
 };
 
@@ -134,15 +147,15 @@ public:
     void Draw(const glm::vec3& position, const glm::vec3& scale) override;
     std::array<glm::vec3, 3> GetTrianglePoints()
     {
-        return points;
+        return mPoints;
     }
     void SetCoordinate(int slot, glm::vec3 p)
     {
         assert(slot >= 0 && slot <= 3);
-        points[slot] = p;
+        mPoints[slot] = p;
     }
-private:
-    std::array<glm::vec3, 3> points;
+
+    std::array<glm::vec3, 3> mPoints;
 };
 
 class Ray : public Collider
@@ -174,11 +187,13 @@ public:
         mDir = dir;
     }
 
-private:
+
     //ps
     glm::vec3 mStart;
     //dr
     glm::vec3 mDir;
+
+    float lengthDir = 1.f;
 };
 
 class Plane : public Collider
@@ -199,9 +214,11 @@ public:
     {
         m_Normal = data;
     }
-private:
+
     // (n.x, n.y, n.z, d)
     glm::vec4 m_Normal;
+
+    float planeScale = 1.f;
 };
 
 

@@ -7,6 +7,6 @@ out vec3 rasterColor;
 uniform vec3 uRasterColor;
 
 void main() {
-    rasterColor = uRasterColor;
+    rasterColor = vec3(1.f, 0.f, 0.f);
     gl_Position = vertexTransform * vec4(FaceNormalPosition, 1.f);
 }

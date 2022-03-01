@@ -14,6 +14,8 @@ End Header --------------------------------------------------------*/
 #define ENGINE_GUIMANAGER_H
 #include <map>
 #include <vector>
+#include "engine/scene_objects/PrimitiveObject.h"
+
 class GLFWwindow;
 namespace GUI{
     class GUI_Window;
@@ -53,5 +55,7 @@ namespace GUI{
         void RenderTextureWindow(const std::string& slotName, std::string& textureName, bool* isOpen);
         void RenderAssignmentDetail();
     };
+
+
 }
 #endif //ENGINE_GUIMANAGER_H

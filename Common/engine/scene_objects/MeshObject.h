@@ -2,8 +2,8 @@
 Copyright (C) 2022 DigiPen Institute of Technology.
 Reproduction or disclosure of this file or its contents without the prior written
 consent of DigiPen Institute of Technology is prohibited.
-File Name: Object.h
-Purpose: Header file for Object
+File Name: MeshObject.h
+Purpose: Header file for MeshObject
 Language: C++, g++
 Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
 Project: y.kim_CS350_1
@@ -11,12 +11,14 @@ Author: Yoonki Kim, y.kim,  180002421
 Creation date: Feb 6, 2022
 End Header --------------------------------------------------------*/
 
-#ifndef ENGINE_OBJECT_H
-#define ENGINE_OBJECT_H
+#ifndef ENGINE_MESHOBJECT_H
+#define ENGINE_MESHOBJECT_H
 
 #include <memory>
 #include <functional>
 #include <vector>
+
+#include "BaseObject.h"
 
 #include "engine/graphic_misc/Shader.h"
 #include "engine/graphic_misc/Mesh.h"
@@ -29,20 +31,18 @@ namespace GUI{
 }
 //class CubeCaptureCamera;
 
-class Object{
+class MeshObject : public BaseObject {
     friend class GUI::GUI_Manager;
 public:
-    Object(const std::string& name);
-    Object(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader);
-    Object(const std::string& name, const std::string& meshStr, const std::string& shaderStr);
+    MeshObject(const std::string& name);
+    MeshObject(const std::string& name, std::shared_ptr<Mesh> pMesh, std::shared_ptr<Shader> pShader);
+    MeshObject(const std::string& name, const std::string& meshStr, const std::string& shaderStr);
 
-    bool DoColliding(Object* other);
-
-    virtual ~Object();
-    void Init();
-    virtual void PreRender();
-    void Render() const;
-    void PostRender();
+    virtual ~MeshObject();
+    void Init() override;
+    virtual void PreRender() override;
+    void Render() const override;
+    void PostRender() override;
 
     void CleanUp() const;
     //todo implement this
@@ -69,18 +69,17 @@ public:
 
     void SetColor(Color newColor);
 
-    void BindFunction(std::function<void(Object*)> func);
+    void BindFunction(std::function<void(MeshObject*)> func);
     void RemoveFunction();
     void SetFunctionUpdate(bool updateStatus);
     void SetTextureOption(bool usingTexture, bool usingGPUUV = false);
 
-    glm::mat4 GetObjectToWorldMatrix() const;
-    std::string GetName() const;
+    [[nodiscard]] glm::mat4 GetObjectToWorldMatrix() const;
+
     void ChangeTexture(int slot, const std::string& textureName);
 
     virtual void TryCalculateMatrix();
     Collider* GetBoundingVolume();
-    void SetBoundingVolume(ColliderTypes type);
 private:
     void RenderVertexNormal() const;
     void RenderFaceNormal() const;
@@ -95,7 +94,7 @@ protected:
 protected:
     std::shared_ptr<Mesh> m_pMesh;
     std::shared_ptr<Shader> m_pShader;
-    std::string mObjectName;
+
     std::string mMeshName;
     std::string mShaderName;
 
@@ -118,13 +117,10 @@ protected:
     Mesh::UVType mUVType;
 
     std::vector<std::string> mTextureSlots;
-
-    Collider* mAABB = nullptr;
-
 public:
     Color baseColor;
     float metallic = 0.f;
     float roughness = 0.5f;
 };
 
-#endif //ENGINE_OBJECT_H
+#endif //ENGINE_MESHOBJECT_H

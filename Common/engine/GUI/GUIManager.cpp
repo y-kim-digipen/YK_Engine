@@ -25,6 +25,7 @@ End Header --------------------------------------------------------*/
 
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include <random>
+#include "engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h"
 
 namespace GUI {
     void GUI_Manager::Init(GLFWwindow *m_pWindow) {
@@ -214,7 +215,7 @@ namespace GUI {
 
             if (ImGui::BeginMenu("Windows")) {
                 if (ImGui::BeginMenu("List")) {
-                    ImGui::MenuItem("Object", NULL, &show_object_list);
+                    ImGui::MenuItem("MeshObject", NULL, &show_object_list);
                     ImGui::MenuItem("Light", NULL, &show_light_list);
                     ImGui::EndMenu();
                 }
@@ -252,8 +253,11 @@ namespace GUI {
     }
 
     void GUI_Manager::RenderObjectList() {
+
         ImGui::Begin("Objects", &show_object_list);
         {
+            static float sliderSpeed = 0.1f;
+            ImGui::InputFloat("SliderSpeed", (float *) &sliderSpeed);
             auto pCurrentScene = engine::GetCurrentScene();
             if (pCurrentScene == nullptr) {
                 return;
@@ -265,55 +269,92 @@ namespace GUI {
                 auto &objNameStr = obj_itr.first;
                 ImGui::PushID(objNameStr.c_str());
                 if (ImGui::CollapsingHeader(objNameStr.c_str())) {
-                    auto currentObject = obj_itr.second;
-                    if (ImGui::TreeNode("Transform")) {
-                        static float sliderSpeed = 0.1f;
-                        ImGui::InputFloat("SliderSpeed", (float *) &sliderSpeed);
-                        ImGui::DragFloat3("Position", (float *) &currentObject->m_position, sliderSpeed);
-                        ImGui::DragFloat3("Scale", (float *) &currentObject->m_scale, sliderSpeed);
-                        ImGui::DragFloat3("Rotation", (float *) &currentObject->m_rotation, sliderSpeed);
-                        ImGui::TreePop();
-                    }
 
-                    if (ImGui::TreeNode("Material")) {
-                        static float sliderSpeed = 0.01f;
-                        ImGui::InputFloat("SliderSpeed", (float *) &sliderSpeed);
-                        ImGui::ColorEdit3("baseColor", (float *) &currentObject->baseColor);
-                        ImGui::DragFloat("metallic", (float *) &currentObject->metallic, sliderSpeed, 0.f, 1.f);
-                        ImGui::DragFloat
-                        ("roughness", (float *) &currentObject->roughness, sliderSpeed, 0.f, 1.f);
-                        ImGui::TreePop();
-                    }
+                    if(obj_itr.second->IsMeshType())
+                    {
+                        MeshObject* currentObject = static_cast<MeshObject*>(obj_itr.second);
+                        if (ImGui::TreeNode("Transform")) {
+                            ImGui::DragFloat3("Position", (float *) &currentObject->m_position, sliderSpeed);
+                            ImGui::DragFloat3("Scale", (float *) &currentObject->m_scale, sliderSpeed);
+                            ImGui::DragFloat3("Rotation", (float *) &currentObject->m_rotation, sliderSpeed);
+                            ImGui::TreePop();
+                        }
 
-                    if (ImGui::TreeNode("Mesh")) {
-                        const std::string usingMeshStr = currentObject->GetUsingMeshName();
-                        if (ImGui::BeginCombo("MeshList", usingMeshStr.c_str())) {
-                            for (const auto &meshName: meshList) {
-                                bool isSelected = (usingMeshStr == meshName);
-                                if (ImGui::Selectable(meshName.c_str(), isSelected)) {
-                                    currentObject->SetMesh(meshName);
+                        if (ImGui::TreeNode("Material")) {
+                            static float sliderSpeed = 0.01f;
+                            ImGui::InputFloat("SliderSpeed", (float *) &sliderSpeed);
+                            ImGui::ColorEdit3("baseColor", (float *) &currentObject->baseColor);
+                            ImGui::DragFloat("metallic", (float *) &currentObject->metallic, sliderSpeed, 0.f, 1.f);
+                            ImGui::DragFloat
+                                    ("roughness", (float *) &currentObject->roughness, sliderSpeed, 0.f, 1.f);
+                            ImGui::TreePop();
+                        }
+
+                        if (ImGui::TreeNode("Mesh")) {
+                            const std::string usingMeshStr = currentObject->GetUsingMeshName();
+                            if (ImGui::BeginCombo("MeshList", usingMeshStr.c_str())) {
+                                for (const auto &meshName: meshList) {
+                                    bool isSelected = (usingMeshStr == meshName);
+                                    if (ImGui::Selectable(meshName.c_str(), isSelected)) {
+                                        currentObject->SetMesh(meshName);
+                                    }
+                                    if (isSelected) {
+                                        ImGui::SetItemDefaultFocus();
+                                    }
                                 }
-                                if (isSelected) {
-                                    ImGui::SetItemDefaultFocus();
+                                ImGui::EndCombo();
+                            }
+                            ImGui::TreePop();
+                        }
+
+                        if (ImGui::TreeNode("Others")) {
+                            if (ImGui::Checkbox("VertexNormalDrawing", &currentObject->mDoVertexNormalDrawing)) {
+                                if (currentObject->mDoFaceNormalDrawing) {
+                                    currentObject->mDoVertexNormalDrawing = false;
                                 }
                             }
-                            ImGui::EndCombo();
+                            if (ImGui::Checkbox("FaceNormalDrawing", &currentObject->mDoFaceNormalDrawing)) {
+                                if (currentObject->mDoVertexNormalDrawing) {
+                                    currentObject->mDoFaceNormalDrawing = false;
+                                }
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
                     }
-
-                    if (ImGui::TreeNode("Others")) {
-                        if (ImGui::Checkbox("VertexNormalDrawing", &currentObject->mDoVertexNormalDrawing)) {
-                            if (currentObject->mDoFaceNormalDrawing) {
-                                currentObject->mDoVertexNormalDrawing = false;
+                    else if(obj_itr.second->IsPrimitiveType())
+                    {
+                        if (ImGui::TreeNode("Primitives")) {
+                            Collider *primitiveObjectCollider = obj_itr.second->GetCollider();
+                            switch (primitiveObjectCollider->GetColliderType()) {
+                                case ColliderTypes::TRIANGLE: {
+                                    Triangle *thisTriangle = static_cast<Triangle *>(primitiveObjectCollider);
+                                    ImGui::DragFloat3("p0", (float *) &thisTriangle->mPoints[0], sliderSpeed);
+                                    ImGui::DragFloat3("p1", (float *) &thisTriangle->mPoints[1], sliderSpeed);
+                                    ImGui::DragFloat3("p2", (float *) &thisTriangle->mPoints[2], sliderSpeed);
+                                    break;
+                                }
+                                case ColliderTypes::PLANE: {
+                                    Plane *thisPlane = static_cast<Plane *>(primitiveObjectCollider);
+                                    ImGui::DragFloat3("normal", (float *) &thisPlane->m_Normal, sliderSpeed);
+                                    ImGui::DragFloat("D", (float *) &thisPlane->m_Normal.w, sliderSpeed);
+                                    ImGui::DragFloat("scale", (float *) &thisPlane->planeScale, sliderSpeed, 1.f, FLT_MAX);
+                                    break;
+                                }
+                                case ColliderTypes::POINT3D: {
+                                    Point3D *thisPoint = static_cast<Point3D *>(primitiveObjectCollider);
+                                    ImGui::DragFloat3("p0", (float *) &thisPoint->mCoordinate, sliderSpeed);
+                                    break;
+                                }
+                                case ColliderTypes::RAY: {
+                                    Ray *thisRay = static_cast<Ray*>(primitiveObjectCollider);
+                                    ImGui::DragFloat3("start point", (float *) &thisRay->mStart, sliderSpeed);
+                                    ImGui::DragFloat3("direction", (float *) &thisRay->mDir, sliderSpeed);
+                                    ImGui::DragFloat("scale", (float *) &thisRay->lengthDir, sliderSpeed, 1.f, FLT_MAX);
+                                    break;
+                                }
                             }
+                            ImGui::TreePop();
                         }
-                        if (ImGui::Checkbox("FaceNormalDrawing", &currentObject->mDoFaceNormalDrawing)) {
-                            if (currentObject->mDoVertexNormalDrawing) {
-                                currentObject->mDoFaceNormalDrawing = false;
-                            }
-                        }
-                        ImGui::TreePop();
                     }
                 }
                 ImGui::PopID();
@@ -543,20 +584,22 @@ namespace GUI {
 
         static float firstOrbitLightRadian = 0.f;
 
-        static auto OrbitsMoveUpdate = [&, currentRadian = 0.f](int i, Object *obj) mutable {
+        static auto OrbitsMoveUpdate = [&, currentRadian = 0.f](int i, MeshObject *obj) mutable {
             //axis y is fixed
             if (DoRearrangeOrbit) {
                 obj->SetScale(glm::vec3(orbitalMoveSphereRadius));
                 currentRadian = firstOrbitLightRadian + PI * 2.f / (numOrbitLights) * i;
             }
             auto pCentralObject = engine::GetCurrentScene()->GetObjectList().find("CentralObject")->second;
-            glm::vec3 center = pCentralObject->GetPosition();
+            assert(pCentralObject->IsMeshType());
+            MeshObject* pCentralMeshObject = static_cast<MeshObject*>(pCentralObject);
+            glm::vec3 center = pCentralMeshObject->GetPosition();
             glm::vec2 fixedYCenter = glm::vec2(center.x, center.z);
             fixedYCenter += orbitRadius * glm::vec2(std::cos(currentRadian), std::sin(currentRadian));
             obj->SetPosition(glm::vec3(fixedYCenter.x, center.y + 1.f, fixedYCenter.y));
             obj->SetRotation(glm::vec3(cos(-currentRadian), 0.f, sin(-currentRadian)));
             static_cast<Light *>(obj)->std140_structure.dir =
-                    obj->GetPosition() + glm::vec3(0.f, 0.5f, 0.f) - pCentralObject->GetPosition();
+                    obj->GetPosition() + glm::vec3(0.f, 0.5f, 0.f) - pCentralMeshObject->GetPosition();
             currentRadian += 0.003f;
             firstOrbitLightRadian += numOrbitLights == 0 ? 0.f : 0.003f / numOrbitLights;
         };
