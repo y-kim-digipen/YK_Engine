@@ -35,6 +35,7 @@ public:
     void PreRender() override{}
     void Render() const override{}
     void PostRender() override{
+        BaseObject::PostRender();
         glDisable(GL_CULL_FACE);
         glLineWidth(2.f);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

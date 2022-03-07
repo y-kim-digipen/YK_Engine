@@ -69,9 +69,6 @@ public:
 
     void SetColor(Color newColor);
 
-    void BindFunction(std::function<void(MeshObject*)> func);
-    void RemoveFunction();
-    void SetFunctionUpdate(bool updateStatus);
     void SetTextureOption(bool usingTexture, bool usingGPUUV = false);
 
     [[nodiscard]] glm::mat4 GetObjectToWorldMatrix() const;
@@ -104,9 +101,6 @@ protected:
     glm::vec3 m_position;
     glm::vec3 m_scale;
     glm::vec3 m_rotation;
-
-    std::function<void(void)> mAdditionalFunction;
-    bool mUpdateAdditionalFunction;
 
     bool mDoVertexNormalDrawing;
     bool mDoFaceNormalDrawing;

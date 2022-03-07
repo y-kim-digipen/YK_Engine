@@ -275,6 +275,7 @@ void MeshObject::Render() const {
 }
 
 void MeshObject::PostRender() {
+    BaseObject::PostRender();
     if (mDoVertexNormalDrawing) {
         RenderVertexNormal();
     }
@@ -290,10 +291,6 @@ void MeshObject::PostRender() {
         mCollider->Draw(GetPosition(), GetScale());
         glLineWidth(1.f);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-    if (mAdditionalFunction != nullptr && mUpdateAdditionalFunction) {
-        mAdditionalFunction();
     }
 }
 
@@ -414,11 +411,6 @@ void MeshObject::AddScale(glm::vec3 amount) {
     m_MatrixCacheDirty = true;
 }
 
-void MeshObject::BindFunction(std::function<void(MeshObject *)> func) {
-    mAdditionalFunction = std::bind(func, this);
-    mUpdateAdditionalFunction = true;
-}
-
 void MeshObject::SetColor(Color newColor) {
     baseColor = newColor;
     if(m_pShader->HasUniform("EmissiveColor"))
@@ -466,14 +458,6 @@ void MeshObject::SendMeshDataToShader()
         m_pShader->GetUniformValue<GLboolean>(mObjectName, "UsingGPUUV_GUIX") = mUsingGPUUV;
     }
 
-}
-
-void MeshObject::RemoveFunction() {
-    mAdditionalFunction = nullptr;
-}
-
-void MeshObject::SetFunctionUpdate(bool updateStatus) {
-    mUpdateAdditionalFunction = updateStatus;
 }
 
 void MeshObject::SetTextureOption(bool usingTexture, bool usingGPUUV) {

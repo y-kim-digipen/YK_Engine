@@ -8,6 +8,18 @@
 
 BaseObject::BaseObject(const std::string& name, ObjectTypes type) : mType(type), mCollider(nullptr), mObjectName(name) {}
 
+void BaseObject::BindFunction(std::function<void(BaseObject *)> func) {
+    mAdditionalFunction = std::bind(func, this);
+    mUpdateAdditionalFunction = true;
+}
+void BaseObject::RemoveFunction() {
+    mAdditionalFunction = nullptr;
+}
+
+void BaseObject::SetFunctionUpdate(bool updateStatus) {
+    mUpdateAdditionalFunction = updateStatus;
+}
+
 void BaseObject::SetCollider(Collider *collider) {
     if(collider == nullptr)
     {
@@ -53,6 +65,14 @@ bool BaseObject::IsMeshType() {
 std::string BaseObject::GetName() const {
     return mObjectName;
 }
+
+void BaseObject::PostRender() {
+    if (mAdditionalFunction != nullptr && mUpdateAdditionalFunction) {
+        mAdditionalFunction();
+    }
+}
+
+
 
 
 

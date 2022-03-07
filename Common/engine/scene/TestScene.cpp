@@ -102,10 +102,15 @@ void TestScene::Init() {
     SceneBase::AddCamera();
     SceneBase::Init();
 
-//    auto pPlaneObj = AddMeshObject("Plane1", "Plane");
+//    auto pPlaneObj = AddObject<MeshObject>("Plane1", "Plane", "DeferredRender");
 //    pPlaneObj->SetRotation(glm::vec3(-HALF_PI, 0.f, 0.f));
 //    pPlaneObj->SetScale(glm::vec3(100.f, 100.f, 100.f));
-//    pPlaneObj->SetPosition(glm::vec3(0.f, -0.45f, 0.f));
+//    pPlaneObj->SetPosition(glm::vec3(0.f, -0.5f, 0.f));
+//    pPlaneObj->SetTextureOption(false);
+//
+//    pPlaneObj = AddObject<MeshObject>("Plane2", "Plane", "DeferredRender");
+//    pPlaneObj->SetScale(glm::vec3(100.f, 100.f, 100.f));
+//    pPlaneObj->SetPosition(glm::vec3(0.f, -0.5f, -40.f));
 //    pPlaneObj->SetTextureOption(false);
 
     auto pObj = AddObject<MeshObject>("CentralObject", "Lucy", "DeferredRender");
@@ -113,36 +118,79 @@ void TestScene::Init() {
     Sphere* objCollider = new Sphere();
     objCollider->BuildFromVertices(engine::GetMesh(static_cast<MeshObject*>(pObj)->GetUsingMeshName())->getVertexBufferVectorForm());
     pObj->SetCollider(objCollider);
-    pObj->AddPosition(glm::vec3(1.f, 1.f, 1.f));
+    pObj->SetPosition(glm::vec3(0.f, 0.f, 0.f));
+    pObj->BindFunction([](BaseObject* obj){
+        static float t = 0.f;
+        MeshObject* pObj = static_cast<MeshObject*>(obj);
+        glm::vec3 currentPos = pObj->GetPosition();
+        pObj->SetPosition(glm::vec3(0.f, currentPos.y, currentPos.z) + glm::vec3(2 * cos(t), 0.f, 0.f));
+        t+= 0.01f;
+    });
 
     pObj = AddObject<MeshObject>("CentralObject2", "Bunny", "DeferredRender");
     static_cast<MeshObject*>(pObj)->SetPosition(glm::vec3(0.f, 0.f, 1.f));
     AABB* objCollider2 = new AABB();
     objCollider2->BuildFromVertices(engine::GetMesh(static_cast<MeshObject*>(pObj)->GetUsingMeshName())->getVertexBufferVectorForm());
     pObj->SetCollider(objCollider2);
-    pObj->AddPosition(glm::vec3(1.f, 1.f, 1.f));
+    pObj->SetPosition(glm::vec3(2.f, 0.f, 0.f));
 
-//    auto primitiveObj = AddObject<PrimitiveObject<Triangle>>("Triangle", glm::vec3(0.f), glm::vec3(0.f, 1.f, 1.f), glm::vec3(0.f, 1.f, 0.f));
-////    auto primitiveObj2 = AddObject<PrimitiveObject<Point3D>>("Point", glm::vec3(0.f, 0.5f, 0.2f));
-//     AddObject<PrimitiveObject<Ray>>("Ray", glm::vec3(0.f, 0.0f, 0.0f), glm::vec3(1.f,0.f, 1.f));
-     AddObject<PrimitiveObject<Plane>>("Plane", glm::vec4(1.f, 0.0f, 0.0f, 1.f));
+    auto triangleObj = AddObject<PrimitiveObject<Triangle>>("Triangle", glm::vec3(-0.3f, -0.2f, -2.9f), glm::vec3(0.7f, 0.0f, -1.2f), glm::vec3(0.f, 1.f, 1.9f));
+    auto pointObj = AddObject<PrimitiveObject<Point3D>>("Point", glm::vec3(0.f, 0.5f, 0.0f));
+    pointObj->BindFunction([](BaseObject* obj){
+        static float t = 0.f;
+        Point3D* point = static_cast<Point3D*>(obj->GetCollider());
+        point->mCoordinate.x = cos(t) * 2.f;
+        point->mCoordinate.z = sin(t) * 2.f;
+        t+= 0.02f;
+    });
 
-//    for(int i = 0; i <= 5; ++i)
-//    {
-//        for(int j = 0; j <= 5; ++j)
-//        {
-//            Color objectColor{1.f, 0.5f, 0.5f};
-//            float metallic = 1.f / 5  * i;
-//            float roughness = 1.f / 5 * j;
-//            glm::vec3 position {-2.f * 5 / 2.f + (10.f / 5) * i, 6.f / 5.f * j, -1.5};
-//            auto ballObj = AddMeshObject("4Sphere" + std::to_string(i) + std::to_string(j), "4Sphere", "DeferredRender");
-//            ballObj->baseColor = objectColor;
-//            ballObj->metallic = metallic;
-//            ballObj->roughness = roughness;
-//
-//            ballObj->SetPosition(position);
-//        }
-//    }
+
+    auto pointObj2 = AddObject<PrimitiveObject<Point3D>>("Point2", glm::vec3(0.f, 0.5f, 0.0f));
+    pointObj2->BindFunction([](BaseObject* obj){
+        static float t = 0.f;
+        Point3D* point = static_cast<Point3D*>(obj->GetCollider());
+        point->mCoordinate.x = sin(t) * 2.f;
+        point->mCoordinate.z = cos(t) * 2.f;
+        point->mCoordinate.y = cos(t) * sin(t) * 2.f;
+        t+= 0.01f;
+    });
+
+    auto rayObj  = AddObject<PrimitiveObject<Ray>>("Ray", glm::vec3(0.f, 0.0f, 0.0f), glm::vec3(1.f,0.f, 1.f));
+    rayObj->BindFunction([](BaseObject* obj){
+        static float t = 0.f;
+
+        Ray* ray = static_cast<Ray*>(obj->GetCollider());
+        ray->mDir.x = cos(t);
+        ray->mDir.z = sin(t);
+        t+= 0.01f;
+    });
+    auto planeObj = AddObject<PrimitiveObject<Plane>>("Plane", glm::vec4(1.f, 0.3f, 0.0f, 0.f));
+    planeObj->BindFunction([](BaseObject* obj)
+    {
+        static float t = 0.f;
+
+        Plane* plane = static_cast<Plane*>(obj->GetCollider());
+        plane->m_Normal.w = 10.f * cos(t);
+        t+= 0.003f;
+    });
+
+    for(int i = 0; i <= 5; ++i)
+    {
+        for(int j = 0; j <= 5; ++j)
+        {
+            Color objectColor{1.f, 0.5f, 0.5f};
+            float metallic = 1.f / 5  * i;
+            float roughness = 1.f / 5 * j;
+            glm::vec3 position {-2.f * 5 / 2.f + (10.f / 5) * i, 6.f / 5.f * j, -30.f};
+            auto ballObj = AddObject<MeshObject>("4Sphere" + std::to_string(i) + std::to_string(j), "4Sphere", "DeferredRender");
+            ballObj->baseColor = objectColor;
+            ballObj->metallic = metallic;
+            ballObj->roughness = roughness;
+            ballObj->SetVisibleOnEditor(false);
+
+            ballObj->SetPosition(position);
+        }
+    }
 }
 
 

@@ -116,6 +116,7 @@ class Point3D : public Collider
 public:
     Point3D() {
         mType = ColliderTypes::POINT3D;
+        mDrawerInfo.meshStr = "ProceduralSphere";
     };
     Point3D(glm::vec3 coord) : Point3D() { SetCoordinate(coord);};
     bool DoCollideWith(Collider* other) override;
@@ -218,7 +219,7 @@ public:
     // (n.x, n.y, n.z, d)
     glm::vec4 m_Normal;
 
-    float planeScale = 1.f;
+    float planeScale = 5.f;
 };
 
 

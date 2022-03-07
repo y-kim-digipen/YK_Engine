@@ -349,7 +349,7 @@ void Sphere::BuildFromVertices(const std::vector<glm::vec3> &vPos) {
     asAABB.BuildFromVertices(vPos);
     glm::vec3 temp = asAABB.GetHalfExtent();
     radius = glm::sqrt(glm::dot(asAABB.GetHalfExtent(), asAABB.GetHalfExtent()));
-    std::cout << temp.x << std::endl;
+//    std::cout << temp.x << std::endl;
 }
 
 bool Sphere::DoCollideWith(Collider *other) {
@@ -579,10 +579,25 @@ bool Point3D::DoCollideWith(Collider *other) {
         {
             Triangle* otherTriangle = static_cast<Triangle*>(other);
             auto trianglePoints = otherTriangle->GetTrianglePoints();
+
             glm::vec3 v0 = GetCoordinate() - trianglePoints[0];
             glm::vec3 v1 = trianglePoints[1] - trianglePoints[0];
             glm::vec3 v2 = trianglePoints[2] - trianglePoints[0];
+            glm::vec3 dr = glm::normalize(glm::cross(v1, v2));
+            float dp = glm::dot(trianglePoints[0], dr);
+            glm::vec3 p0 = dp * dr;
 
+//            glm::vec3 projectedCoord = GetCoordinate() - glm::dot(GetCoordinate() - p0, dr) * dr;
+
+            glm::vec4 normalizedPlaneData = glm::vec4(dr.x, dr.y, dr.z, dp);
+            float result1 = glm::dot(glm::vec4(GetCoordinate().x, GetCoordinate().y, GetCoordinate().z, -1.f), normalizedPlaneData);
+
+            if(abs(result1) > 0.02f)
+            {
+                return false;
+            }
+
+//            v0 = projectedCoord;
 
             float a = glm::dot(v1, v1);
             float b = glm::dot(v2, v1);
@@ -592,10 +607,16 @@ bool Point3D::DoCollideWith(Collider *other) {
             float d = glm::dot(v2, v2);
             float f = glm::dot(v0, v2);
 
+            if(std::isnan(e) || std::isnan(f))
+            {
+                return false;
+            }
+
             float u = (e * d - b * f) / (a * d - b * c);
             float v = (a * f - e * c) / (a * d - b * c);
+            float w = 1.f - u - v;
 
-            if(u < -0.05 || u > 1.05 || v < -0.05 || v > 1.05)
+            if(u < -0.0f || u > 1.0f || v < -0.0f || v > 1.0f || w < -0.0f || w > 1.0f)
             {
                 return false;
             }
@@ -609,72 +630,75 @@ bool Point3D::DoCollideWith(Collider *other) {
 
 void Point3D::Draw(const glm::vec3 &position, const glm::vec3 &scale)
 {
-    std::vector<glm::vec3> vPositions;
-    GLuint vertexVBO;
+    glm::mat4 modelToWorld{1.f};
+    auto pMesh = engine::GetMesh(mDrawerInfo.meshStr);
+    const auto meshBoundingBox = pMesh->GetBoundingBox();
+    glm::vec3 meshSize = (meshBoundingBox.second - meshBoundingBox.first);
+    glm::vec3 meshCenter = (meshBoundingBox.second + meshBoundingBox.first) * 0.5f;
 
-    vPositions.push_back(GetCoordinate());
+    modelToWorld = glm::translate(modelToWorld, GetCoordinate());
 
-    glGenBuffers(1, &vertexVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
-    glBufferData(GL_ARRAY_BUFFER, vPositions.size() * sizeof(decltype(vPositions)::value_type),
-                 vPositions.data(), GL_STATIC_DRAW);
+    modelToWorld = glm::scale(modelToWorld, glm::vec3(0.1f));
 
+    //set the bounding box y height to 1
+    modelToWorld = glm::scale(modelToWorld, 1.f / glm::vec3(meshSize.y));
+    modelToWorld = glm::translate(modelToWorld, -meshCenter);
 
-    //////////////Drawing Logic//////////////
     auto pShader = engine::GetShader(mDrawerInfo.shaderStr);
+    assert(pShader != nullptr && pMesh != nullptr);
+
     const GLint shaderPID = pShader->GetProgramID();
 
-
     //setting&binding buffer
-    auto &attributeInfos = pShader->GetAttribInfos();
-    const GLuint VAOID = engine::GetVAOManager().GetVAO(
-            pShader->GetAttributeID());
+    auto& attributeInfos = pShader->GetAttribInfos();
+    const GLuint VAO_ID = engine::GetVAOManager().GetVAO(pShader->GetAttributeID());
 
-    glBindVertexArray(VAOID);
-    for (auto &attribute: attributeInfos) {
-        if (attribute.name == "vPosition") {
-            glEnableVertexAttribArray(attribute.location);
+    auto& VBOInfo = engine::GetVBOManager().GetVBOInfo(pMesh);
 
+    glBindVertexArray(VAO_ID);
+    for(auto& attribute : attributeInfos){
+        glEnableVertexAttribArray(attribute.location);
 
-            glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
-            glVertexAttribPointer(attribute.location,
-                                  attribute.DataSize,
-                                  attribute.DataType,
-                                  GL_FALSE,
-                                  0,
-                                  (void *) 0);
-        }
+        glBindBuffer(GL_ARRAY_BUFFER, VBOInfo.first[attribute.name]);
+        glVertexAttribPointer( attribute.location,
+                               attribute.DataSize,
+                               attribute.DataType,
+                               GL_FALSE,
+                               0,
+                               (void *) 0 );
     }
+    //setup EBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOInfo.second);
+
     //Drawing Logic
     glUseProgram(shaderPID);
+
+    const auto& pCam = engine::GetCurrentScene()->GetCurrentCamera();
 
     if(pShader->HasUniform("EmissiveColor"))
     {
         pShader->SetUniformVec3f("EmissiveColor", mDebuggingColor);
     }
 
-    GLint vTransformLoc = glGetUniformLocation(shaderPID, "vertexTransform");
-    if (vTransformLoc < 0) {
-        std::cerr << "Unable to find uniform variable!" << std::endl;
-    }
-    const auto &pCam = engine::GetCurrentScene()->GetCurrentCamera();
-
-    glm::mat4 tempToWorld(1.f);
     glm::mat4 viewMatrix = pCam->GetLookAtMatrix();
     glm::mat4 projectionMatrix = pCam->GetPerspectiveMatrix();
-    glm::mat4 mvpMatrix = projectionMatrix * viewMatrix * tempToWorld;
+    glm::mat4 modelToWorldMatrix = modelToWorld;
 
-    glUniformMatrix4fv(vTransformLoc, 1, GL_FALSE, &mvpMatrix[0][0]);
+    glm::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelToWorldMatrix;
+    glm::mat4 normalMatrix = modelToWorldMatrix;
 
-    //Draw
-    glPointSize(	5.f);
-    glDrawArrays(GL_POINT, 0, vPositions.size());
-    //Clean
+    if(pShader->HasUniform("vertexTransform")) {
+        pShader->SetUniformMatrix4f("vertexTransform", mvpMatrix);
+    }
+    if(pShader->HasUniform("vertexNormalTransform")) {
+        pShader->SetUniformMatrix4f("vertexNormalTransform", normalMatrix);
+    }
 
-    for (auto &attribute: attributeInfos) {
+    glDrawElements(GL_TRIANGLES, pMesh->getVertexIndicesCount(), GL_UNSIGNED_INT, (void*) 0);
+
+    for(auto& attribute : attributeInfos){
         glDisableVertexAttribArray(attribute.location);
     }
-    glDeleteBuffers(1, &vertexVBO);
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -701,6 +725,29 @@ bool Triangle::DoCollideWith(Collider *other) {
             Point3D* otherPoint = static_cast<Point3D*>(other);
             return otherPoint->DoCollideWith(this);
         }
+        case ColliderTypes::PLANE:
+        {
+            Plane* otherPlane = static_cast<Plane*>(other);
+
+            bool allinSamePosOrNeg = true;
+            bool lastPositiveSide = false;
+            for(int i = 0; i < 3; ++i)
+            {
+                glm::vec3 point = mPoints[i];
+
+                glm::vec3 planeNormal = glm::normalize(glm::vec3(otherPlane->GetPlaneData()));
+                glm::vec4 normalizedPlaneData = glm::vec4(planeNormal.x, planeNormal.y, planeNormal.z, otherPlane->GetPlaneData().w);
+                float result1 = glm::dot(glm::vec4(point.x, point.y, point.z, -1.f), normalizedPlaneData);
+                bool OnPositiveSide = result1 >= 0.f;
+                if(i != 0 && lastPositiveSide != OnPositiveSide)
+                {
+                    allinSamePosOrNeg = false;
+                    break;
+                }
+                lastPositiveSide = OnPositiveSide;
+            }
+            return !allinSamePosOrNeg;
+        }
         case ColliderTypes::RAY:
         {
             Ray* otherRay = static_cast<Ray*>(other);
@@ -710,19 +757,24 @@ bool Triangle::DoCollideWith(Collider *other) {
             glm::vec3 v1 = trianglePoints[1] - trianglePoints[0];
             glm::vec3 v2 = trianglePoints[2] - trianglePoints[0];
 
-            glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+            glm::vec3 n = glm::normalize(glm::cross(v1, v2));
 
-            float d = glm::dot(trianglePoints[0], normal);
+            float d = glm::dot(trianglePoints[0], n);
 
-            Plane planeFromTriangle(glm::vec4(normal.x, normal.y, normal.z, d));
+            Plane planeFromTriangle(glm::vec4(n.x, n.y, n.z, d));
 
-            if(!planeFromTriangle.DoCollideWith(otherRay))
+            if(planeFromTriangle.DoCollideWith(otherRay) == false)
             {
                 return false;
             }
 
-            float t = -(glm::dot(otherRay->GetStartPoint(), normal) + d) / glm::dot(glm::normalize(otherRay->GetDirection()), normal);
-            glm::vec3 p = otherRay->GetStartPoint() + t * otherRay->GetDirection();
+            glm::vec3 p0 = n * d;
+
+            glm::vec3 dr = glm::normalize(otherRay->GetDirection());
+            glm::vec3 ps = otherRay->GetStartPoint();
+            float t = glm::dot(-n, (ps - p0))/glm::dot(n, dr);
+
+            glm::vec3 p = otherRay->GetStartPoint() + t * dr;
 
             Point3D point(p);
 
@@ -801,6 +853,17 @@ void Triangle::Draw(const glm::vec3 &position, const glm::vec3 &scale) {
     glDeleteBuffers(1, &vertexVBO);
     glBindVertexArray(0);
     glUseProgram(0);
+
+
+//    glm::vec3 v1 = GetTrianglePoints()[1] - GetTrianglePoints()[0];
+//    glm::vec3 v2 =  GetTrianglePoints()[2] - GetTrianglePoints()[0];
+//
+//    glm::vec3 n = glm::normalize(glm::cross(v1, v2));
+//
+//    float d = glm::dot(n, GetTrianglePoints()[0]);
+//
+//    Plane planeBuildFromTriangle = Plane(glm::vec4(n.x, n.y, n.z, d));
+//    planeBuildFromTriangle.Draw(position, scale);
 }
 
 bool Ray::DoCollideWith(Collider *other) {
@@ -823,16 +886,13 @@ bool Ray::DoCollideWith(Collider *other) {
         case ColliderTypes::PLANE:
         {
             Plane* otherPlane = static_cast<Plane*>(other);
-            glm::vec4 planeData = otherPlane->GetPlaneData();
-            glm::vec3 normal = glm::vec3(planeData.x, planeData.y, planeData.z);
-            float d = planeData.w;
+            glm::vec3 n = glm::normalize(glm::vec3(otherPlane->GetPlaneData()));
+            glm::vec3 p0 = n * otherPlane->GetPlaneData().w;
 
-            float t = -(glm::dot(GetStartPoint(), normal) + d) / glm::dot(glm::normalize(GetDirection()), normal);
-            glm::vec3 p = GetStartPoint() + t * GetDirection();
-
-            Point3D point(p);
-
-            return point.DoCollideWith(otherPlane);
+            glm::vec3 dr = glm::normalize(GetDirection());
+            glm::vec3 ps = GetStartPoint();
+            float t = glm::dot(-n, (ps - p0))/glm::dot(n, dr);
+            return t > 0;
         }
         case ColliderTypes::TRIANGLE:
         {
@@ -952,9 +1012,6 @@ void Ray::Draw(const glm::vec3 &position, const glm::vec3 &scale) {
     glDeleteBuffers(1, &vertexVBO);
     glBindVertexArray(0);
     glUseProgram(0);
-
-    Point3D startPoint(GetStartPoint());
-    startPoint.Draw(position, scale);
 }
 
 bool Plane::DoCollideWith(Collider *other) {
@@ -977,16 +1034,12 @@ bool Plane::DoCollideWith(Collider *other) {
         case ColliderTypes::RAY:
         {
             Ray* otherRay = static_cast<Ray*>(other);
-
-            glm::vec3 ps = otherRay->GetStartPoint();
-            glm::vec3 dr = glm::normalize(otherRay->GetDirection());
-            glm::vec3 n = glm::vec3(GetPlaneData());
-            glm::vec3 normalizedDr = glm::normalize(dr);
-            glm::vec3 p0 = normalizedDr * GetPlaneData().w;
-
-            float t = glm::dot(-n, (ps - p0)) / glm::dot(n, dr);
-
-            return t > 0;
+            return otherRay->DoCollideWith(this);
+        }
+        case ColliderTypes::TRIANGLE:
+        {
+            Triangle* otherTriangle = static_cast<Triangle*>(other);
+            return otherTriangle->DoCollideWith(this);
         }
         default: {
             return false;
@@ -1095,7 +1148,7 @@ void Plane::Draw(const glm::vec3 &position, const glm::vec3 &scale) {
     vPositions.push_back(translatedExtendedPlaneP3);
 
     vPositions.push_back(p0);
-    vPositions.push_back(p0 + planeScale * dr + (-0.7f * dr));
+    vPositions.push_back(p0 + planeScale * dr * 0.3f);
 
 
     glGenBuffers(1, &vertexVBO);

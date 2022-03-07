@@ -266,10 +266,13 @@ namespace GUI {
             const auto &meshList = engine::GetMeshManager().GetNameList();
 
             for (auto &obj_itr: ObjList) {
+                if(obj_itr.second->mVisibleOnEditor == false)
+                {
+                    continue;
+                }
                 auto &objNameStr = obj_itr.first;
                 ImGui::PushID(objNameStr.c_str());
                 if (ImGui::CollapsingHeader(objNameStr.c_str())) {
-
                     if(obj_itr.second->IsMeshType())
                     {
                         MeshObject* currentObject = static_cast<MeshObject*>(obj_itr.second);
@@ -579,13 +582,14 @@ namespace GUI {
         using std::placeholders::_1;
         static int numOrbitLights = 8;
 //        numOrbitLights = engine::GetCurrentScene()->GetNumActiveLights();
-        constexpr float orbitRadius = 1.5f;
+        constexpr float orbitRadius = 3.5f;
         constexpr float orbitalMoveSphereRadius = 0.2f;
 
         static float firstOrbitLightRadian = 0.f;
 
-        static auto OrbitsMoveUpdate = [&, currentRadian = 0.f](int i, MeshObject *obj) mutable {
+        static auto OrbitsMoveUpdate = [&, currentRadian = 0.f](int i, BaseObject *pObj) mutable {
             //axis y is fixed
+            MeshObject* obj = static_cast<MeshObject*>(pObj);
             if (DoRearrangeOrbit) {
                 obj->SetScale(glm::vec3(orbitalMoveSphereRadius));
                 currentRadian = firstOrbitLightRadian + PI * 2.f / (numOrbitLights) * i;
@@ -593,10 +597,10 @@ namespace GUI {
             auto pCentralObject = engine::GetCurrentScene()->GetObjectList().find("CentralObject")->second;
             assert(pCentralObject->IsMeshType());
             MeshObject* pCentralMeshObject = static_cast<MeshObject*>(pCentralObject);
-            glm::vec3 center = pCentralMeshObject->GetPosition();
+            glm::vec3 center = glm::vec3();
             glm::vec2 fixedYCenter = glm::vec2(center.x, center.z);
             fixedYCenter += orbitRadius * glm::vec2(std::cos(currentRadian), std::sin(currentRadian));
-            obj->SetPosition(glm::vec3(fixedYCenter.x, center.y + 1.f, fixedYCenter.y));
+            obj->SetPosition(glm::vec3(fixedYCenter.x, center.y + 3.f, fixedYCenter.y));
             obj->SetRotation(glm::vec3(cos(-currentRadian), 0.f, sin(-currentRadian)));
             static_cast<Light *>(obj)->std140_structure.dir =
                     obj->GetPosition() + glm::vec3(0.f, 0.5f, 0.f) - pCentralMeshObject->GetPosition();
@@ -642,6 +646,10 @@ namespace GUI {
                 }
 
             }
+            auto pLight = engine::GetCurrentScene()->AddLight("TopLight", "Sphere", "DiffuseShader");
+            pLight->std140_structure.type = Light::POINT_LIGHT;;
+            pLight->SetPosition(glm::vec3(0.f, 10.f, 15.f));
+            pLight->std140_structure.Ia = glm::vec3(255.f);
             firstStart = false;
             DoRearrangeOrbit = true;
         }
@@ -742,6 +750,16 @@ namespace GUI {
                     for (auto &light: lights) {
                         if (light.first.find("OrbitObject") <= light.first.length()) {
                             light.second->SetFunctionUpdate(update);
+                        }
+                    }
+                }
+
+                static bool UpdateAttachedFunctionStatus = true;
+                if (ImGui::Checkbox("UpdateAttachedFunction", &UpdateAttachedFunctionStatus)) {
+                    auto &objects = engine::GetCurrentScene()->GetObjectList();
+                    for (auto &object : objects) {
+                        if (object.second->HasAdditionalFunction()) {
+                            object.second->SetFunctionUpdate(UpdateAttachedFunctionStatus);
                         }
                     }
                 }
