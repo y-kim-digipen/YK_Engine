@@ -6,109 +6,87 @@ include( ../Common/build_files/Common_packages.cmake )
 set( TARGET_NAME Engine )
 
 add_executable( ${TARGET_NAME}
-        ../Common/main.cpp
+        engine/main.cpp
+#        ../External/imgui-docking/examples/example_glfw_opengl3/main.cpp
         #IMGUI_BEGIN
-        ../External/imgui-1.84.2/imconfig.h
-        ../External/imgui-1.84.2/imgui.cpp
-        ../External/imgui-1.84.2/imgui.h
-        ../External/imgui-1.84.2/imgui_demo.cpp
-        ../External/imgui-1.84.2/imgui_draw.cpp
-        ../External/imgui-1.84.2/imgui_internal.h
-        ../External/imgui-1.84.2/imgui_tables.cpp
-        ../External/imgui-1.84.2/imgui_widgets.cpp
-        ../External/imgui-1.84.2/imstb_rectpack.h
-        ../External/imgui-1.84.2/imstb_textedit.h
-        ../External/imgui-1.84.2/imstb_truetype.h
-        ../External/imgui-1.84.2/imgui_impl_glfw.cpp
-        ../External/imgui-1.84.2/imgui_impl_glfw.h
-        ../External/imgui-1.84.2/imgui_impl_opengl3.cpp
-        ../External/imgui-1.84.2/imgui_impl_opengl3.h
-        ../External/imgui-1.84.2/imgui_impl_opengl3_loader.h
-        #IMGUI_END
-        ../Common/CommonConstants.h
-        Shader.cpp
-        Shader.h
-        #        ../Common/Utilities.cpp
-        #        ../Common/Utilities.h
-        #        ../Common/SceneManager.cpp
-        #        ../Common/SceneManager.h
-        ../Common/OBJReader.cpp
-        ../Common/OBJReader.h
-        ../Common/Mesh.cpp
-        ../Common/Mesh.h
-        #        ../Common/VertexDataManager.cpp
-        #        ../Common/VertexDataManager.h
-        #        ../Common/UniformBufferManager.cpp
-        #        ../Common/UniformBufferManager.h
-        #        ../Common/TextureManager.cpp
-        #        ../Common/TextureManager.h
-        #        ../Common/TextureManager430.cpp
-        #        ../Common/TextureManager430.h
-        #        ../Common/ShaderManager.cpp
-        #        ../Common/ShaderManager.h
-        #        ../Common/GeometryShaderManager.cpp
-        #        ../Common/GeometryShaderManager.h
-        #        ../Common/Light.cpp
-        #        ../Common/Light.h
-        ../Common/Input/KeyCodes.h
-        ../Common/Input/InputManager.cpp
-        ../Common/Input/InputManager.h
-        ../Common/Engine.cpp
-        ../Common/Engine.h
-        ../Common/Color.h
-        ../Common/SceneBase.h
-        ../Common/ObjectComponents/ComponentBase.h
-        ../Common/ObjectComponents/ComponentManager.h
-        ../Common/ObjectComponents/ComponentManager.inl
-        ../Common/TestScene.h
-        ../Common/Object.cpp
-        ../Common/Object.h
-        ../Common/Camera.cpp
-        ../Common/Camera.h
-        ../Common/SceneBase.cpp
-        ../Common/Light.h
-        #GUI stuffs begin
-        ../Common/GUI/GUIManager.h
-        ../Common/GUI/GUIManager.cpp
-        ../Common/GUI/GUIObject.h
-        ../Common/GUI/GUIWindow.cpp
-        ../Common/GUI/GUIWindow.h
-        ../Common/GUI/GUIContent.h
-        ../Common/GUI/CurrentCameraInfoContent.h
-        ../Common/GUI/CurrentCameraInfoContent.cpp
-        ../Common/GUI/EngineInfo.cpp
-        ../Common/GUI/EngineInfo.h
-        ../Common/GUI/ObjectListContent.cpp
-        ../Common/GUI/ObjectListContent.h
-        #GUI stuffs end
+        ../External/imgui-docking/imconfig.h
+        ../External/imgui-docking/imgui.cpp
+        ../External/imgui-docking/imgui.h
+        ../External/imgui-docking/imgui_demo.cpp
+        ../External/imgui-docking/imgui_draw.cpp
+        ../External/imgui-docking/imgui_internal.h
+        ../External/imgui-docking/imgui_tables.cpp
+        ../External/imgui-docking/imgui_widgets.cpp
+        ../External/imgui-docking/imstb_rectpack.h
+        ../External/imgui-docking/imstb_textedit.h
+        ../External/imgui-docking/imstb_truetype.h
 
-        GUI/ColorSet.h
-        GUI/ObjectDetailContent.cpp
-        GUI/ObjectDetailContent.h
-        VAOManager.cpp
-        VAOManager.h
-        VBOManager.cpp
-        VBOManager.h
-        UBO.cpp
-        UBO.h
-        GUI/LightListContent.cpp
-        GUI/LightListContent.h
-        GUI/LightDetailContent.cpp
-        GUI/LightDetailContent.h
-        Environment.h
-        TextureManager.cpp
-        TextureManager.h
-        TextureObject.cpp
-        TextureObject.h
-        GUI/EngineInfoContent.cpp GUI/EngineInfoContent.h TestScene.cpp)
+        ../External/imgui-docking/backends/imgui_impl_glfw.cpp
+        ../External/imgui-docking/backends/imgui_impl_glfw.h
+        ../External/imgui-docking/backends/imgui_impl_opengl3.cpp
+        ../External/imgui-docking/backends/imgui_impl_opengl3.h
+        ../External/imgui-docking/backends/imgui_impl_opengl3_loader.h
+
+        #IMGUI_END
+        engine/common_constants.h
+        ../Common/engine/graphic_misc/Shader.cpp
+        ../Common/engine/graphic_misc/Shader.h
+
+        ../Common/engine/graphic_misc/OBJReader.cpp
+        ../Common/engine/graphic_misc/OBJReader.h
+        ../Common/engine/graphic_misc/Mesh.cpp
+        ../Common/engine/graphic_misc/Mesh.h
+
+        ../Common/engine/input/KeyCodes.h
+        ../Common/engine/input/InputManager.cpp
+        ../Common/engine/input/InputManager.h
+        engine/engine.cpp
+        engine/engine.h
+        ../Common/engine/graphic_misc/Color.h
+        ../Common/engine/scene/SceneBase.h
+        ../Common/object_components/ComponentBase.h
+        ../Common/object_components/ComponentManager.h
+        ../Common/object_components/ComponentManager.inl
+        ../Common/engine/scene/TestScene.h
+        engine/scene_objects/MeshObject.cpp
+        engine/scene_objects/MeshObject.h
+        ../Common/engine/scene_objects/Camera.cpp
+        ../Common/engine/scene_objects/Camera.h
+        ../Common/engine/scene/SceneBase.cpp
+        ../Common/engine/scene_objects/Light.h
+
+        ../Common/engine/GUI/ColorSet.h
+        ../Common/engine/graphic_misc/VAOManager.cpp
+        ../Common/engine/graphic_misc/VAOManager.h
+        ../Common/engine/graphic_misc/VBOManager.cpp
+        ../Common/engine/graphic_misc/VBOManager.h
+        ../Common/engine/graphic_misc/UBO.cpp
+        ../Common/engine/graphic_misc/UBO.h
+
+        ../Common/engine/graphic_misc/Environment.h
+        ../Common/engine/graphic_misc/TextureManager.cpp
+        ../Common/engine/graphic_misc/TextureManager.h
+        ../Common/engine/graphic_misc/TextureObject.cpp
+        ../Common/engine/graphic_misc/TextureObject.h
+
+        ../Common/engine/scene/TestScene.cpp
+        ../Common/engine/graphic_misc/FBO.h
+        ../Common/engine/graphic_misc/FBO.cpp
+
+        #GUI
+        ../Common/engine/GUI/GUIManager.h
+        ../Common/engine/GUI/GUIManager.cpp
+        ../Common/engine/GUI/GUIObject.h
+        engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.cpp engine/scene_objects/BaseObject.cpp engine/scene_objects/BaseObject.h engine/graphic_misc/BoundingVolume/ColliderTypes.h engine/scene_objects/PrimitiveObject.h engine/scene_objects/Light.cpp)
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )
 target_include_directories( ${TARGET_NAME} PUBLIC ${GLFW_INCLUDE_DIRS} )
 target_include_directories( ${TARGET_NAME} PUBLIC "../Common/" )
-target_include_directories( ${TARGET_NAME} PUBLIC "../Common/shaders/" )
+target_include_directories( ${TARGET_NAME} PUBLIC "data/" )
 target_include_directories( ${TARGET_NAME} PUBLIC /usr/local/include/ )
-target_include_directories( ${TARGET_NAME} PUBLIC "../External/imgui-1.84.2/" )
+target_include_directories( ${TARGET_NAME} PUBLIC "../External/imgui-docking/" )
+target_include_directories( ${TARGET_NAME} PUBLIC "../External/imgui-docking/backends/" )
 
 #target_include_directories( common_lib PUBLIC /usr/local/include/eigen3/
 #        /usr/local/include/nanovg/src/ )

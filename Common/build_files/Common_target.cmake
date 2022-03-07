@@ -5,40 +5,6 @@ target_include_directories( ${TARGET_NAME} PUBLIC "../Common/" )
 target_include_directories( ${TARGET_NAME} PUBLIC "/usr/local/include/" )
 
 add_library( common_lib
-        ../Common/shader.cpp
-        ../Common/shader.hpp
-#        ../Common/Utilities.cpp
-#        ../Common/Utilities.h
-        ../Common/Scene.cpp
-        ../Common/Scene.h
-#        ../Common/SceneManager.cpp
-#        ../Common/SceneManager.h
-        ../Common/OBJReader.cpp
-        ../Common/OBJReader.h
-        ../Common/Mesh.cpp
-        ../Common/Mesh.h
-#        ../Common/VertexDataManager.cpp
-#        ../Common/VertexDataManager.h
-#        ../Common/UniformBufferManager.cpp
-#        ../Common/UniformBufferManager.h
-#        ../Common/TextureManager.cpp
-#        ../Common/TextureManager.h
-#        ../Common/TextureManager430.cpp
-#        ../Common/TextureManager430.h
-#        ../Common/ShaderManager.cpp
-#        ../Common/ShaderManager.h
-#        ../Common/GeometryShaderManager.cpp
-#        ../Common/GeometryShaderManager.h
-#        ../Common/Light.cpp
-#        ../Common/Light.h
-        ../Common/Input/KeyCodes.h
-        ../Common/Input/InputManager.cpp
-        ../Common/Input/InputManager.h
-        ../Common/Engine.cpp
-        ../Common/Engine.h
-        ../Common/Color.h
-
-
         )
 
 target_link_libraries( common_lib ${GLEW_LIBRARIES}  ${GLFW_LIBRARIES}
