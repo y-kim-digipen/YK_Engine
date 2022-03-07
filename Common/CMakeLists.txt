@@ -77,7 +77,7 @@ add_executable( ${TARGET_NAME}
         ../Common/engine/GUI/GUIManager.h
         ../Common/engine/GUI/GUIManager.cpp
         ../Common/engine/GUI/GUIObject.h
-        engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.cpp engine/scene_objects/BaseObject.cpp engine/scene_objects/BaseObject.h engine/graphic_misc/BoundingVolume/ColliderTypes.h engine/scene_objects/PrimitiveObject.inl engine/scene_objects/PrimitiveObject.h engine/scene_objects/Light.cpp)
+        engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.h engine/graphic_misc/BoundingVolume/BasicBoundingVolumes.cpp engine/scene_objects/BaseObject.cpp engine/scene_objects/BaseObject.h engine/graphic_misc/BoundingVolume/ColliderTypes.h engine/scene_objects/PrimitiveObject.h engine/scene_objects/Light.cpp)
 
 # Set target properties
 target_include_directories( ${TARGET_NAME} PUBLIC ${OPENGL_INCLUDE_DIR} )

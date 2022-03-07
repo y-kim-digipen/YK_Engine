@@ -1,6 +1,15 @@
-//
-// Created by yoonki on 2/23/22.
-//
+/* Start Header -------------------------------------------------------
+Copyright (C) 2022 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the prior written
+consent of DigiPen Institute of Technology is prohibited.
+File Name: BasicBoundingVolumes.cpp
+Purpose: Source files for BasicBoundingVolumes
+Language: C++, g++
+Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
+Project: y.kim_CS350_2
+Author: Yoonki Kim, y.kim,  180002421
+Creation date: Mar 6, 2022
+End Header --------------------------------------------------------*/
 #include <glm/gtx/transform.hpp>
 
 #include "BasicBoundingVolumes.h"
@@ -121,6 +130,7 @@ bool AABB::DoCollideWith(Collider *other) {
             glm::vec3 otherMinAABB = otherAABBCenter - otherAABBHalfExtent;
             glm::vec3 otherMaxAABB =  otherAABBCenter + otherAABBHalfExtent;
 
+            //All three axis must collide(intersect)
             for(unsigned int i = 0; i < 3; ++i)
             {
                 if(thisMaxAABB[i] < otherMinAABB[i] || thisMinAABB[i] > otherMaxAABB[i])
@@ -133,6 +143,7 @@ bool AABB::DoCollideWith(Collider *other) {
             Sphere* otherSphere = static_cast<Sphere*>(other);
             glm::vec3 dirSphereCenterToAABB =  otherSphere->GetCenter() - GetCenter();
             glm::vec3 halfExtent = GetHalfExtent();
+            //Choose a closest point to check it is colliding(dist is smaller than radius)
             glm::vec3 closestPoint = GetCenter() + glm::vec3(std::clamp(dirSphereCenterToAABB.x, -halfExtent.x, halfExtent.x),
                                                              std::clamp(dirSphereCenterToAABB.y, -halfExtent.y, halfExtent.y),
                                                              std::clamp(dirSphereCenterToAABB.z, -halfExtent.z, halfExtent.z));
@@ -143,6 +154,7 @@ bool AABB::DoCollideWith(Collider *other) {
         }
         case ColliderTypes::POINT3D:
         {
+            //Just simple point/AABB
             Point3D* otherPoint = static_cast<Point3D*>(other);
             glm::vec3 pointCoord = otherPoint->GetCoordinate();
 
@@ -171,6 +183,7 @@ bool AABB::DoCollideWith(Collider *other) {
 
             glm::vec3 dirFrag = glm::vec3(1.f) / glm::normalize(rayDir);
 
+            //Do collision test with 6 planes and save t values for them
             float t1 = (MinAABB.x - rayStart.x) * dirFrag.x;
             float t2 = (MaxAABB.x - rayStart.x) * dirFrag.x;
             float t3 = (MinAABB.y - rayStart.y) * dirFrag.y;
@@ -181,6 +194,7 @@ bool AABB::DoCollideWith(Collider *other) {
             float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
             float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
 
+            //intersection point not overlapped in AABB
             if(tmax < 0 || tmin > tmax)
             {
                 return false;
@@ -190,11 +204,12 @@ bool AABB::DoCollideWith(Collider *other) {
         }
         case ColliderTypes::PLANE:
         {
-//            //x, y, z order
+            //x, y, z order
             Plane* otherPlane = static_cast<Plane*>(other);
 
             bool allinSamePosOrNeg = true;
             bool lastPositiveSide = false;
+            //compare with all possible AABB 8 points
             for(int i = 0; i < 8; ++i)
             {
                 bool posX = i & 1;
@@ -207,6 +222,7 @@ bool AABB::DoCollideWith(Collider *other) {
 
                 glm::vec3 planeNormal = glm::normalize(glm::vec3(otherPlane->GetPlaneData()));
                 glm::vec4 normalizedPlaneData = glm::vec4(planeNormal.x, planeNormal.y, planeNormal.z, otherPlane->GetPlaneData().w);
+                //Simple equation, is this point is on plane, or if it's out it is laying on negative or positive side of plane
                 float result1 = glm::dot(glm::vec4(point.x, point.y, point.z, -1.f), normalizedPlaneData);
                 bool OnPositiveSide = result1 >= 0.f;
                 if(i != 0 && lastPositiveSide != OnPositiveSide)
@@ -216,6 +232,7 @@ bool AABB::DoCollideWith(Collider *other) {
                 }
                 lastPositiveSide = OnPositiveSide;
             }
+            //if not all in the same side it collides
             return !allinSamePosOrNeg;
         }
         default: {
@@ -345,11 +362,11 @@ void Sphere::BuildFromVertices(const std::vector<glm::vec3> &vPos) {
 
 //    center = (minpt + maxpt) * 0.5f * factor * 0.5f;
 
+    //This just using AABB as a sphere
     AABB asAABB;
     asAABB.BuildFromVertices(vPos);
     glm::vec3 temp = asAABB.GetHalfExtent();
     radius = glm::sqrt(glm::dot(asAABB.GetHalfExtent(), asAABB.GetHalfExtent()));
-//    std::cout << temp.x << std::endl;
 }
 
 bool Sphere::DoCollideWith(Collider *other) {
@@ -365,6 +382,7 @@ bool Sphere::DoCollideWith(Collider *other) {
         }
         case ColliderTypes::SPHERE:
         {
+            //Simple point/point dist compare with sum of radius
             Sphere* otherSphere = static_cast<Sphere*>(other);
             float dist = glm::length(GetCenter() - otherSphere->GetCenter());
             float sumRadius = GetRadius() + otherSphere->GetRadius();
@@ -372,6 +390,7 @@ bool Sphere::DoCollideWith(Collider *other) {
         }
         case ColliderTypes::POINT3D:
         {
+            //Almost identical with Sphere/Sphere
             Point3D* otherPoint = static_cast<Point3D*>(other);
             float dist = glm::length(GetCenter() - otherPoint->GetCoordinate());
             float squareRadius = GetRadius() * GetRadius();
@@ -389,10 +408,13 @@ bool Sphere::DoCollideWith(Collider *other) {
 
             glm::vec3 vP0C = c - p0;
 
+            //Get a projected coord which project center of sphere to plane
             glm::vec3 projectedC = c - glm::dot(vP0C, normalizedDr) * normalizedDr;
 
+            //get a distance coord from sphere center to projected coord
             float distCtoPc = glm::length(c - projectedC);
 
+            //if distance is smaller than radius, it collides
             return distCtoPc < GetRadius();
         }
         case ColliderTypes::RAY: {
@@ -406,17 +428,19 @@ bool Sphere::DoCollideWith(Collider *other) {
             float b = glm::dot(m, glm::normalize(dr));
             float c = glm::dot(m, m) - r * r;
 
+            //in this case, it will not give correct t value(ray start is out of the sphere and never intersect)
             if(c > 0.f && b > 0.f)
             {
                 return false;
             }
             float discr = b * b - c;
 
+            //no intersect(it never meets)
             if(discr < 0)
             {
                 return false;
             }
-
+            //meets at two points or one point
             return true;
         }
         default: {
@@ -571,8 +595,10 @@ bool Point3D::DoCollideWith(Collider *other) {
             Plane* otherPlane = static_cast<Plane*>(other);
             glm::vec4 planeData = otherPlane->GetPlaneData();
             glm::vec3 dr = glm::vec3{planeData.x, planeData.y, planeData.z};
+            //just dot product of two equation, this gives the right result for w(distance from plane)
             float w = glm::dot(planeData, glm::vec4(GetCoordinate().x, GetCoordinate().y, GetCoordinate().z, 1.f));
 
+            //give extra padding for detection
             return glm::abs(w) < PlaneEpsilon;
         }
         case ColliderTypes::TRIANGLE:
@@ -587,18 +613,16 @@ bool Point3D::DoCollideWith(Collider *other) {
             float dp = glm::dot(trianglePoints[0], dr);
             glm::vec3 p0 = dp * dr;
 
-//            glm::vec3 projectedCoord = GetCoordinate() - glm::dot(GetCoordinate() - p0, dr) * dr;
-
             glm::vec4 normalizedPlaneData = glm::vec4(dr.x, dr.y, dr.z, dp);
+            //Just for giving extra padding for it
             float result1 = glm::dot(glm::vec4(GetCoordinate().x, GetCoordinate().y, GetCoordinate().z, -1.f), normalizedPlaneData);
-
+            //Plane / point triangle early rejection point
             if(abs(result1) > 0.02f)
             {
                 return false;
             }
 
-//            v0 = projectedCoord;
-
+            //Cramer's rule
             float a = glm::dot(v1, v1);
             float b = glm::dot(v2, v1);
             float e = glm::dot(v0, v1);
@@ -731,6 +755,7 @@ bool Triangle::DoCollideWith(Collider *other) {
 
             bool allinSamePosOrNeg = true;
             bool lastPositiveSide = false;
+            //Check 3 points with plane, to see more detail check AABB plane section
             for(int i = 0; i < 3; ++i)
             {
                 glm::vec3 point = mPoints[i];
@@ -761,8 +786,10 @@ bool Triangle::DoCollideWith(Collider *other) {
 
             float d = glm::dot(trianglePoints[0], n);
 
+            //make a plane from triangle's three points
             Plane planeFromTriangle(glm::vec4(n.x, n.y, n.z, d));
 
+            //if ray is not colliding with plane, it means not colliding with triangle
             if(planeFromTriangle.DoCollideWith(otherRay) == false)
             {
                 return false;
@@ -772,12 +799,14 @@ bool Triangle::DoCollideWith(Collider *other) {
 
             glm::vec3 dr = glm::normalize(otherRay->GetDirection());
             glm::vec3 ps = otherRay->GetStartPoint();
+            //get a intersection t for calculate point exactly on the plane, this is identical with ray/plane collision.
             float t = glm::dot(-n, (ps - p0))/glm::dot(n, dr);
 
             glm::vec3 p = otherRay->GetStartPoint() + t * dr;
 
             Point3D point(p);
 
+            //After get point, the result must be identical with point/triangle collision
             return DoCollideWith(&point);
         }
         default: {
@@ -853,17 +882,6 @@ void Triangle::Draw(const glm::vec3 &position, const glm::vec3 &scale) {
     glDeleteBuffers(1, &vertexVBO);
     glBindVertexArray(0);
     glUseProgram(0);
-
-
-//    glm::vec3 v1 = GetTrianglePoints()[1] - GetTrianglePoints()[0];
-//    glm::vec3 v2 =  GetTrianglePoints()[2] - GetTrianglePoints()[0];
-//
-//    glm::vec3 n = glm::normalize(glm::cross(v1, v2));
-//
-//    float d = glm::dot(n, GetTrianglePoints()[0]);
-//
-//    Plane planeBuildFromTriangle = Plane(glm::vec4(n.x, n.y, n.z, d));
-//    planeBuildFromTriangle.Draw(position, scale);
 }
 
 bool Ray::DoCollideWith(Collider *other) {
@@ -887,10 +905,12 @@ bool Ray::DoCollideWith(Collider *other) {
         {
             Plane* otherPlane = static_cast<Plane*>(other);
             glm::vec3 n = glm::normalize(glm::vec3(otherPlane->GetPlaneData()));
+            //calculate p0 using normal and d
             glm::vec3 p0 = n * otherPlane->GetPlaneData().w;
 
             glm::vec3 dr = glm::normalize(GetDirection());
             glm::vec3 ps = GetStartPoint();
+            //project ps to the plane's normal, and divide it dot n, dr(all normalized) which is cos between two normals this gives the t value for intersection t on ray
             float t = glm::dot(-n, (ps - p0))/glm::dot(n, dr);
             return t > 0;
         }

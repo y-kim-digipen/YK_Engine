@@ -1,7 +1,15 @@
-//
-// Created by yoonki on 2/23/22.
-//
-
+/* Start Header -------------------------------------------------------
+Copyright (C) 2022 DigiPen Institute of Technology.
+Reproduction or disclosure of this file or its contents without the prior written
+consent of DigiPen Institute of Technology is prohibited.
+File Name: BasicBoundingVolumes.h
+Purpose: Header files for BasicBoundingVolumes
+Language: C++, g++
+Platform: gcc version 9.3.0/ Linux / Opengl 4.5 supported GPU required
+Project: y.kim_CS350_2
+Author: Yoonki Kim, y.kim,  180002421
+Creation date: Mar 6, 2022
+End Header --------------------------------------------------------*/
 #ifndef ENGINE_BASICBOUNDINGVOLUMES_H
 #define ENGINE_BASICBOUNDINGVOLUMES_H
 
@@ -18,8 +26,6 @@ struct ColliderDrawerInfo
     std::string shaderStr = "DiffuseShader";
 };
 
-//static Color DebugColorGreen = Color(0.f, 1.f, 0.f);
-//static Color DebugColorRed = Color(1.f, 0.f, 0.f);
 static Color DebugColorWhite = Color(1.f, 1.f, 1.f);
 
 class Collider
